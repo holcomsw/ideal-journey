@@ -609,6 +609,273 @@ h1, h2, h3 {
   text-align: center;
 }
 
+/* ============================================
+   Shared Page Header (About, Archive, etc.)
+   ============================================ */
+
+.page-header {
+  position: relative;
+  padding: var(--space-2xl) 0 var(--space-xl);
+  text-align: center;
+  color: var(--color-white);
+  overflow: hidden;
+}
+
+.page-header-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      135deg,
+      var(--color-navy-deep) 0%,
+      var(--color-navy) 40%,
+      var(--color-lake) 100%
+    );
+  z-index: 0;
+}
+
+.page-header-content {
+  position: relative;
+  z-index: 1;
+  padding: var(--space-md);
+}
+
+.page-header-label {
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-gold-light);
+  margin-bottom: var(--space-xs);
+  font-weight: 600;
+}
+
+.page-header-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 7vw, 4rem);
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+  text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+}
+
+.page-header-subtitle {
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.75);
+  font-style: italic;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* ============================================
+   About Page
+   ============================================ */
+
+/* --- Origin Story --- */
+.about-origin {
+  background: var(--color-white);
+}
+
+.about-origin-content {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.prose .lead {
+  font-size: 1.25rem;
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--color-navy);
+  line-height: 1.8;
+  margin-bottom: var(--space-md);
+}
+
+.prose p {
+  color: var(--color-text-light);
+  font-size: 1.05rem;
+  line-height: 1.8;
+  margin-bottom: var(--space-sm);
+}
+
+.prose em {
+  color: var(--color-lake);
+}
+
+/* --- How It Works --- */
+.about-process {
+  background: var(--color-cream);
+}
+
+.process-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-md);
+}
+
+.process-step {
+  text-align: center;
+  padding: var(--space-md) var(--space-sm);
+  background: var(--color-white);
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  position: relative;
+}
+
+.process-number {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-xs);
+}
+
+.process-icon {
+  color: var(--color-lake);
+  margin-bottom: var(--space-sm);
+}
+
+.process-step h3 {
+  font-size: 1.1rem;
+  color: var(--color-navy);
+  margin-bottom: var(--space-xs);
+}
+
+.process-step p {
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+  line-height: 1.6;
+}
+
+/* --- Memorable Moments --- */
+.about-moments {
+  background: var(--color-white);
+}
+
+.moments-timeline {
+  position: relative;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: var(--space-md) 0;
+}
+
+.moments-line {
+  position: absolute;
+  left: 50px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--color-pine), var(--color-lake), var(--color-sunset));
+  opacity: 0.3;
+}
+
+.moment-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+  position: relative;
+}
+
+.moment-year-badge {
+  flex-shrink: 0;
+  width: 100px;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-navy);
+  text-align: center;
+  position: relative;
+}
+
+.moment-year-badge::after {
+  content: '';
+  position: absolute;
+  right: -13px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  background: var(--color-sunset);
+  border-radius: 50%;
+  border: 3px solid var(--color-white);
+}
+
+.moment-card {
+  flex: 1;
+  background: var(--color-cream);
+  border-radius: 12px;
+  padding: var(--space-sm) calc(var(--space-sm) * 1.5);
+  border-left: 3px solid var(--color-lake);
+}
+
+.moment-card--highlight {
+  background: var(--color-navy);
+  border-left-color: var(--color-gold);
+}
+
+.moment-card--highlight h3 {
+  color: var(--color-gold-light);
+}
+
+.moment-card--highlight p {
+  color: rgba(245, 239, 227, 0.8);
+}
+
+.moment-card--future {
+  border-left-color: var(--color-sunset);
+  border-style: dashed;
+  border-left-style: dashed;
+}
+
+.moment-card h3 {
+  font-size: 1.15rem;
+  color: var(--color-navy);
+  margin-bottom: 6px;
+}
+
+.moment-card p {
+  color: var(--color-text-light);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* --- Founders --- */
+.about-founders {
+  background: var(--color-cream);
+}
+
+.founders-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.founder-card {
+  text-align: center;
+  padding: var(--space-lg) var(--space-md);
+  background: var(--color-white);
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+
+.founder-avatar {
+  color: var(--color-lake);
+  margin-bottom: var(--space-sm);
+  opacity: 0.5;
+}
+
+.founder-card h3 {
+  font-size: 1.2rem;
+  color: var(--color-navy);
+  margin-bottom: 4px;
+}
+
+.founder-role {
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+  font-style: italic;
+}
+
 /* --- Footer --- */
 .footer {
   background: var(--color-navy-deep);
@@ -1156,6 +1423,27 @@ h1, h2, h3 {
     grid-auto-rows: 140px;
   }
 
+  .process-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .founders-grid {
+    grid-template-columns: 1fr;
+    max-width: 320px;
+  }
+
+  .moment-item {
+    gap: var(--space-sm);
+  }
+
+  .moment-year-badge {
+    width: 80px;
+  }
+
+  .moments-line {
+    left: 40px;
+  }
+
   .footer-content {
     flex-direction: column;
     text-align: center;
@@ -1225,5 +1513,29 @@ h1, h2, h3 {
 
   .vote-countdown {
     gap: var(--space-sm);
+  }
+
+  .process-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .moment-item {
+    flex-direction: column;
+    padding-left: 50px;
+    gap: var(--space-xs);
+  }
+
+  .moment-year-badge {
+    width: auto;
+    text-align: left;
+  }
+
+  .moment-year-badge::after {
+    right: auto;
+    left: -34px;
+  }
+
+  .moments-line {
+    left: 22px;
   }
 }
