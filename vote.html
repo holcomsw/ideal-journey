@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vote &mdash; Elk Rapids Film Festival 2026</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Password Gate -->
+  <div id="login-gate" class="login-gate">
+    <div class="login-overlay"></div>
+    <div class="login-content">
+      <div class="login-icon" aria-hidden="true">
+        <svg viewBox="0 0 100 100" width="64" height="64">
+          <rect x="10" y="15" width="80" height="70" rx="4" fill="none" stroke="currentColor" stroke-width="3"/>
+          <rect x="10" y="15" width="80" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="3"/>
+          <line x1="30" y1="15" x2="30" y2="31" stroke="currentColor" stroke-width="3"/>
+          <line x1="50" y1="15" x2="50" y2="31" stroke="currentColor" stroke-width="3"/>
+          <line x1="70" y1="15" x2="70" y2="31" stroke="currentColor" stroke-width="3"/>
+          <polygon points="42,50 42,72 62,61" fill="currentColor"/>
+        </svg>
+      </div>
+      <h1 class="login-title">The Elk Rapids<br>Film Festival</h1>
+      <p class="login-tagline">A Celebration of Cinema &amp; Friendship</p>
+      <form id="login-form" class="login-form">
+        <div class="login-field">
+          <input type="password" id="login-password" class="login-input" placeholder="Enter password" autocomplete="off" required>
+          <button type="submit" class="login-button">Enter</button>
+        </div>
+        <p id="login-error" class="login-error" hidden>Incorrect password. Please try again.</p>
+      </form>
+      <p class="login-hint">Family &amp; friends only</p>
+    </div>
+  </div>
+
+  <!-- Site Content -->
+  <div id="site-content" class="site-content site-content--locked">
+
+  <!-- Vote Page Header -->
+  <header class="vote-hero">
+    <div class="vote-hero-bg"></div>
+    <nav class="nav nav--dark">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="vote.html" class="nav-link nav-link--active">Vote</a>
+    </nav>
+    <div class="vote-hero-content">
+      <p class="vote-hero-label">Elk Rapids Film Festival</p>
+      <h1 class="vote-hero-title">Vote for 2026</h1>
+      <p class="vote-hero-theme">This Year's Theme: <strong>TBA</strong></p>
+      <div id="vote-countdown" class="vote-countdown"></div>
+      <p class="vote-hero-instructions">Select your top pick and tell us why!</p>
+    </div>
+  </header>
+
+  <!-- Voting Open State -->
+  <div id="vote-open">
+
+    <!-- Film Nominees -->
+    <section class="section vote-nominees">
+      <div class="container">
+        <h2 class="section-title">The Nominees</h2>
+        <p class="section-intro">This year's selections. Study them carefully &mdash; you only get one vote.</p>
+
+        <div class="nominees-grid" id="nominees-grid">
+          <!-- Film 1 -->
+          <div class="nominee-card" data-film-id="1">
+            <div class="nominee-poster">
+              <div class="nominee-poster-placeholder">
+                <svg viewBox="0 0 64 64" width="40" height="40"><rect x="8" y="4" width="48" height="56" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><polygon points="26,24 26,44 42,34" fill="currentColor"/></svg>
+              </div>
+            </div>
+            <div class="nominee-info">
+              <h3 class="nominee-title">Film Title One</h3>
+              <p class="nominee-meta">2024 &middot; Director Name &middot; 120 min</p>
+              <p class="nominee-synopsis">A compelling story that captures the imagination. This placeholder synopsis will be replaced with the actual film description once nominees are finalized.</p>
+              <p class="nominee-theme-fit"><strong>Why it fits:</strong> This film perfectly embodies this year's theme through its storytelling and visual style.</p>
+              <button class="btn btn--vote" data-film-id="1">Vote for This Film</button>
+            </div>
+          </div>
+
+          <!-- Film 2 -->
+          <div class="nominee-card" data-film-id="2">
+            <div class="nominee-poster">
+              <div class="nominee-poster-placeholder">
+                <svg viewBox="0 0 64 64" width="40" height="40"><rect x="8" y="4" width="48" height="56" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><polygon points="26,24 26,44 42,34" fill="currentColor"/></svg>
+              </div>
+            </div>
+            <div class="nominee-info">
+              <h3 class="nominee-title">Film Title Two</h3>
+              <p class="nominee-meta">2023 &middot; Director Name &middot; 105 min</p>
+              <p class="nominee-synopsis">An unforgettable journey that will leave you thinking long after the credits roll. Placeholder text for the second nominee.</p>
+              <p class="nominee-theme-fit"><strong>Why it fits:</strong> A natural choice for this year's theme with its bold visual language and emotional depth.</p>
+              <button class="btn btn--vote" data-film-id="2">Vote for This Film</button>
+            </div>
+          </div>
+
+          <!-- Film 3 -->
+          <div class="nominee-card" data-film-id="3">
+            <div class="nominee-poster">
+              <div class="nominee-poster-placeholder">
+                <svg viewBox="0 0 64 64" width="40" height="40"><rect x="8" y="4" width="48" height="56" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><polygon points="26,24 26,44 42,34" fill="currentColor"/></svg>
+              </div>
+            </div>
+            <div class="nominee-info">
+              <h3 class="nominee-title">Film Title Three</h3>
+              <p class="nominee-meta">2025 &middot; Director Name &middot; 138 min</p>
+              <p class="nominee-synopsis">A masterful blend of humor and heart. This placeholder will be updated once the actual nominees are selected for 2026.</p>
+              <p class="nominee-theme-fit"><strong>Why it fits:</strong> Its themes of friendship and adventure make it a perfect match for the festival.</p>
+              <button class="btn btn--vote" data-film-id="3">Vote for This Film</button>
+            </div>
+          </div>
+
+          <!-- Film 4 -->
+          <div class="nominee-card" data-film-id="4">
+            <div class="nominee-poster">
+              <div class="nominee-poster-placeholder">
+                <svg viewBox="0 0 64 64" width="40" height="40"><rect x="8" y="4" width="48" height="56" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><polygon points="26,24 26,44 42,34" fill="currentColor"/></svg>
+              </div>
+            </div>
+            <div class="nominee-info">
+              <h3 class="nominee-title">Film Title Four</h3>
+              <p class="nominee-meta">2022 &middot; Director Name &middot; 112 min</p>
+              <p class="nominee-synopsis">A crowd favorite that brings the whole family together. Placeholder description for the fourth nominee film.</p>
+              <p class="nominee-theme-fit"><strong>Why it fits:</strong> A classic pick that channels the spirit of summer and cinema in equal measure.</p>
+              <button class="btn btn--vote" data-film-id="4">Vote for This Film</button>
+            </div>
+          </div>
+
+          <!-- Film 5 -->
+          <div class="nominee-card" data-film-id="5">
+            <div class="nominee-poster">
+              <div class="nominee-poster-placeholder">
+                <svg viewBox="0 0 64 64" width="40" height="40"><rect x="8" y="4" width="48" height="56" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><polygon points="26,24 26,44 42,34" fill="currentColor"/></svg>
+              </div>
+            </div>
+            <div class="nominee-info">
+              <h3 class="nominee-title">Film Title Five</h3>
+              <p class="nominee-meta">2024 &middot; Director Name &middot; 95 min</p>
+              <p class="nominee-synopsis">Short, sweet, and utterly captivating. This dark horse nominee might just steal the show at this year's festival.</p>
+              <p class="nominee-theme-fit"><strong>Why it fits:</strong> Don't let its runtime fool you &mdash; this film packs a thematic punch.</p>
+              <button class="btn btn--vote" data-film-id="5">Vote for This Film</button>
+            </div>
+          </div>
+
+          <!-- Film 6 -->
+          <div class="nominee-card" data-film-id="6">
+            <div class="nominee-poster">
+              <div class="nominee-poster-placeholder">
+                <svg viewBox="0 0 64 64" width="40" height="40"><rect x="8" y="4" width="48" height="56" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><polygon points="26,24 26,44 42,34" fill="currentColor"/></svg>
+              </div>
+            </div>
+            <div class="nominee-info">
+              <h3 class="nominee-title">Film Title Six</h3>
+              <p class="nominee-meta">2023 &middot; Director Name &middot; 130 min</p>
+              <p class="nominee-synopsis">An epic that demands to be seen on the biggest screen possible. Placeholder text for the sixth and final nominee.</p>
+              <p class="nominee-theme-fit"><strong>Why it fits:</strong> Go big or go home &mdash; this film is made for a festival setting.</p>
+              <button class="btn btn--vote" data-film-id="6">Vote for This Film</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Vote Modal -->
+    <div id="vote-modal" class="modal" hidden>
+      <div class="modal-backdrop"></div>
+      <div class="modal-content">
+        <button class="modal-close" aria-label="Close">&times;</button>
+        <h3 class="modal-title">Cast Your Vote</h3>
+        <p class="modal-film-name" id="modal-film-name"></p>
+        <form id="vote-form" class="vote-form">
+          <input type="hidden" id="vote-film-id">
+          <div class="form-group">
+            <label for="vote-name" class="form-label">Your Name <span class="required">*</span></label>
+            <input type="text" id="vote-name" class="form-input" placeholder="Enter your name" required>
+          </div>
+          <div class="form-group">
+            <label for="vote-comment" class="form-label">Why this film? <span class="optional">(optional)</span></label>
+            <textarea id="vote-comment" class="form-textarea" rows="3" placeholder="Tell us why you're voting for this one..."></textarea>
+          </div>
+          <button type="submit" class="btn btn--submit">Submit Vote</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Vote Confirmation -->
+    <div id="vote-confirmation" class="modal" hidden>
+      <div class="modal-backdrop"></div>
+      <div class="modal-content modal-content--confirmation">
+        <div class="confirmation-icon" aria-hidden="true">
+          <svg viewBox="0 0 64 64" width="56" height="56"><circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" stroke-width="3"/><path d="M20 32 L28 40 L44 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3 class="modal-title">Vote Submitted!</h3>
+        <p class="confirmation-text">Thanks, <span id="confirmation-name"></span>! Your vote for <strong id="confirmation-film"></strong> has been recorded.</p>
+        <button class="btn btn--submit" id="confirmation-close">Back to Nominees</button>
+      </div>
+    </div>
+
+    <!-- Write-in Suggestions -->
+    <section class="section vote-writein">
+      <div class="container">
+        <h2 class="section-title">Suggest a Film</h2>
+        <p class="section-intro">Think we missed something? Nominate a film that fits this year's theme.</p>
+        <div class="writein-form-wrapper">
+          <form id="writein-form" class="writein-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="writein-title" class="form-label">Film Title <span class="required">*</span></label>
+                <input type="text" id="writein-title" class="form-input" placeholder="e.g. The Grand Budapest Hotel" required>
+              </div>
+              <div class="form-group form-group--small">
+                <label for="writein-year" class="form-label">Year</label>
+                <input type="text" id="writein-year" class="form-input" placeholder="e.g. 2014">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="writein-reason" class="form-label">Why does it fit the theme? <span class="required">*</span></label>
+              <textarea id="writein-reason" class="form-textarea" rows="3" placeholder="Make your case..." required></textarea>
+            </div>
+            <div class="form-group">
+              <label for="writein-name" class="form-label">Your Name <span class="required">*</span></label>
+              <input type="text" id="writein-name" class="form-input" placeholder="Enter your name" required>
+            </div>
+            <button type="submit" class="btn btn--submit">Submit Suggestion</button>
+          </form>
+          <div id="writein-success" class="writein-success" hidden>
+            <p>Thanks for the suggestion! We'll consider it for the lineup.</p>
+          </div>
+        </div>
+
+        <!-- Submitted Suggestions -->
+        <div id="suggestions-list" class="suggestions-list" hidden>
+          <h3 class="suggestions-heading">Submitted Suggestions</h3>
+          <div id="suggestions-container"></div>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- end #vote-open -->
+
+  <!-- Voting Closed State -->
+  <div id="vote-closed" hidden>
+    <section class="section vote-results">
+      <div class="container">
+        <h2 class="section-title">Voting Results</h2>
+        <p class="section-intro">The people have spoken. Here's how the votes came in.</p>
+        <div id="results-container" class="results-container"></div>
+        <p class="results-note">The final lineup will be announced soon. See you July 4th!</p>
+      </div>
+    </section>
+  </div><!-- end #vote-closed -->
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <p class="footer-title">The Elk Rapids Film Festival</p>
+          <p class="footer-location">Elk Rapids, Michigan</p>
+        </div>
+        <div class="footer-details">
+          <p>Est. 2010 &middot; Three Friends &middot; Sixteen Summers</p>
+          <p>July 4&ndash;11, Every Year</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2010&ndash;2026 The Elk Rapids Film Festival. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  </div><!-- end #site-content -->
+
+  <script src="script.js"></script>
+</body>
+</html>

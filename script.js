@@ -120,6 +120,246 @@
     });
   }
 
+  // --- Voting System ---
+  var VOTES_KEY = 'erff_votes';
+  var SUGGESTIONS_KEY = 'erff_suggestions';
+  var VOTING_DEADLINE = new Date('2026-06-30T23:59:59');
+
+  function getVotes() {
+    try { return JSON.parse(localStorage.getItem(VOTES_KEY)) || []; }
+    catch (e) { return []; }
+  }
+
+  function saveVote(vote) {
+    var votes = getVotes();
+    votes.push(vote);
+    localStorage.setItem(VOTES_KEY, JSON.stringify(votes));
+  }
+
+  function getSuggestions() {
+    try { return JSON.parse(localStorage.getItem(SUGGESTIONS_KEY)) || []; }
+    catch (e) { return []; }
+  }
+
+  function saveSuggestion(suggestion) {
+    var suggestions = getSuggestions();
+    suggestions.push(suggestion);
+    localStorage.setItem(SUGGESTIONS_KEY, JSON.stringify(suggestions));
+  }
+
+  function isVotingOpen() {
+    return new Date() <= VOTING_DEADLINE;
+  }
+
+  function initVotingCountdown() {
+    var el = document.getElementById('vote-countdown');
+    if (!el) return;
+
+    function update() {
+      var now = new Date();
+      var diff = VOTING_DEADLINE - now;
+
+      if (diff <= 0) {
+        el.innerHTML = '<p style="color: var(--color-gold-light); font-weight: 600;">Voting has closed!</p>';
+        return;
+      }
+
+      var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      var hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      var seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      el.innerHTML =
+        '<div class="countdown-unit"><span class="countdown-number">' + days + '</span><span class="countdown-label">Days</span></div>' +
+        '<div class="countdown-unit"><span class="countdown-number">' + hours + '</span><span class="countdown-label">Hours</span></div>' +
+        '<div class="countdown-unit"><span class="countdown-number">' + minutes + '</span><span class="countdown-label">Min</span></div>' +
+        '<div class="countdown-unit"><span class="countdown-number">' + seconds + '</span><span class="countdown-label">Sec</span></div>';
+    }
+
+    update();
+    setInterval(update, 1000);
+  }
+
+  function initVotingSystem() {
+    var voteOpen = document.getElementById('vote-open');
+    var voteClosed = document.getElementById('vote-closed');
+    if (!voteOpen) return;
+
+    initVotingCountdown();
+
+    if (!isVotingOpen()) {
+      voteOpen.hidden = true;
+      voteClosed.hidden = false;
+      renderResults();
+      return;
+    }
+
+    // Vote buttons
+    document.querySelectorAll('.btn--vote').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var filmId = this.getAttribute('data-film-id');
+        var card = this.closest('.nominee-card');
+        var filmName = card.querySelector('.nominee-title').textContent;
+        openVoteModal(filmId, filmName);
+      });
+    });
+
+    // Vote form submission
+    var voteForm = document.getElementById('vote-form');
+    if (voteForm) {
+      voteForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var filmId = document.getElementById('vote-film-id').value;
+        var name = document.getElementById('vote-name').value.trim();
+        var comment = document.getElementById('vote-comment').value.trim();
+        var card = document.querySelector('.nominee-card[data-film-id="' + filmId + '"]');
+        var filmName = card ? card.querySelector('.nominee-title').textContent : '';
+
+        saveVote({
+          filmId: filmId,
+          filmName: filmName,
+          voterName: name,
+          comment: comment,
+          timestamp: new Date().toISOString()
+        });
+
+        closeModal('vote-modal');
+        showConfirmation(name, filmName);
+      });
+    }
+
+    // Modal close handlers
+    document.querySelectorAll('.modal-backdrop').forEach(function (backdrop) {
+      backdrop.addEventListener('click', function () {
+        var modal = this.closest('.modal');
+        if (modal) modal.hidden = true;
+      });
+    });
+
+    document.querySelectorAll('.modal-close').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var modal = this.closest('.modal');
+        if (modal) modal.hidden = true;
+      });
+    });
+
+    var confirmClose = document.getElementById('confirmation-close');
+    if (confirmClose) {
+      confirmClose.addEventListener('click', function () {
+        closeModal('vote-confirmation');
+      });
+    }
+
+    // Write-in form
+    var writeinForm = document.getElementById('writein-form');
+    if (writeinForm) {
+      writeinForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var title = document.getElementById('writein-title').value.trim();
+        var year = document.getElementById('writein-year').value.trim();
+        var reason = document.getElementById('writein-reason').value.trim();
+        var name = document.getElementById('writein-name').value.trim();
+
+        saveSuggestion({
+          title: title,
+          year: year,
+          reason: reason,
+          suggestedBy: name,
+          timestamp: new Date().toISOString()
+        });
+
+        writeinForm.reset();
+        var success = document.getElementById('writein-success');
+        if (success) {
+          success.hidden = false;
+          setTimeout(function () { success.hidden = true; }, 3000);
+        }
+
+        renderSuggestions();
+      });
+    }
+
+    renderSuggestions();
+  }
+
+  function openVoteModal(filmId, filmName) {
+    var modal = document.getElementById('vote-modal');
+    document.getElementById('vote-film-id').value = filmId;
+    document.getElementById('modal-film-name').textContent = filmName;
+    document.getElementById('vote-name').value = '';
+    document.getElementById('vote-comment').value = '';
+    modal.hidden = false;
+    document.getElementById('vote-name').focus();
+  }
+
+  function closeModal(id) {
+    var modal = document.getElementById(id);
+    if (modal) modal.hidden = true;
+  }
+
+  function showConfirmation(name, filmName) {
+    document.getElementById('confirmation-name').textContent = name;
+    document.getElementById('confirmation-film').textContent = filmName;
+    document.getElementById('vote-confirmation').hidden = false;
+  }
+
+  function renderSuggestions() {
+    var suggestions = getSuggestions();
+    var container = document.getElementById('suggestions-container');
+    var list = document.getElementById('suggestions-list');
+    if (!container || !list || !suggestions.length) return;
+
+    list.hidden = false;
+    container.innerHTML = suggestions.map(function (s) {
+      return '<div class="suggestion-item">' +
+        '<h4>' + escapeHtml(s.title) + (s.year ? ' (' + escapeHtml(s.year) + ')' : '') + '</h4>' +
+        '<p>' + escapeHtml(s.reason) + '</p>' +
+        '<p class="suggestion-by">Suggested by ' + escapeHtml(s.suggestedBy) + '</p>' +
+        '</div>';
+    }).join('');
+  }
+
+  function renderResults() {
+    var votes = getVotes();
+    var container = document.getElementById('results-container');
+    if (!container) return;
+
+    // Tally votes by film
+    var tally = {};
+    votes.forEach(function (v) {
+      var key = v.filmName || ('Film ' + v.filmId);
+      tally[key] = (tally[key] || 0) + 1;
+    });
+
+    // Sort by vote count
+    var sorted = Object.keys(tally).sort(function (a, b) {
+      return tally[b] - tally[a];
+    });
+
+    if (!sorted.length) {
+      container.innerHTML = '<p style="text-align:center;color:var(--color-text-light);">No votes were cast this year.</p>';
+      return;
+    }
+
+    var maxVotes = tally[sorted[0]];
+
+    container.innerHTML = sorted.map(function (name) {
+      var count = tally[name];
+      var pct = Math.round((count / maxVotes) * 100);
+      return '<div class="result-bar">' +
+        '<span class="result-name">' + escapeHtml(name) + '</span>' +
+        '<div class="result-track"><div class="result-fill" style="width: ' + pct + '%"></div></div>' +
+        '<span class="result-count">' + count + '</span>' +
+        '</div>';
+    }).join('');
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
   // Initialize
   document.addEventListener('DOMContentLoaded', function () {
     initLoginGate();
@@ -127,5 +367,6 @@
     initScrollAnimations();
     initSmoothScroll();
     initHeroParallax();
+    initVotingSystem();
   });
 })();
