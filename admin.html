@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin &mdash; Elk Rapids Film Festival</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Admin Login -->
+  <div id="admin-login" class="admin-login">
+    <div class="admin-login-inner">
+      <h1 class="admin-login-title">Admin Panel</h1>
+      <p class="admin-login-subtitle">Elk Rapids Film Festival</p>
+      <form id="admin-login-form" class="login-form">
+        <div class="login-field" style="max-width:320px;">
+          <input type="password" id="admin-password" class="login-input" placeholder="Admin password" autocomplete="off" required>
+          <button type="submit" class="login-button">Login</button>
+        </div>
+        <p id="admin-login-error" class="login-error" hidden>Incorrect password.</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard -->
+  <div id="admin-dashboard" class="admin-dashboard" hidden>
+
+    <!-- Admin Header -->
+    <header class="admin-header">
+      <div class="container">
+        <div class="admin-header-inner">
+          <h1 class="admin-header-title">ERFF Admin</h1>
+          <div class="admin-header-actions">
+            <a href="index.html" class="admin-link">View Site</a>
+            <button id="admin-logout" class="admin-link admin-link--logout">Logout</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Admin Nav -->
+    <nav class="admin-nav">
+      <div class="container">
+        <div class="admin-tabs">
+          <button class="admin-tab admin-tab--active" data-tab="films">Films</button>
+          <button class="admin-tab" data-tab="voting">Voting</button>
+          <button class="admin-tab" data-tab="quotes">Quotes</button>
+          <button class="admin-tab" data-tab="content">Content</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Tab Panels -->
+    <main class="admin-main">
+      <div class="container">
+
+        <!-- Films Tab -->
+        <div class="admin-panel" id="panel-films">
+          <div class="admin-panel-header">
+            <h2>Manage Films</h2>
+            <button class="btn btn--submit" style="width:auto;" id="add-film-btn">+ Add Film</button>
+          </div>
+
+          <!-- Add/Edit Film Form -->
+          <div id="film-form-section" class="admin-form-section" hidden>
+            <h3 id="film-form-title">Add New Film</h3>
+            <form id="film-form" class="admin-form">
+              <input type="hidden" id="film-edit-id">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Film Title <span class="required">*</span></label>
+                  <input type="text" id="film-title" class="form-input" required>
+                </div>
+                <div class="form-group form-group--small">
+                  <label class="form-label">Year</label>
+                  <input type="text" id="film-year-input" class="form-input">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Director</label>
+                  <input type="text" id="film-director" class="form-input">
+                </div>
+                <div class="form-group form-group--small">
+                  <label class="form-label">Runtime</label>
+                  <input type="text" id="film-runtime" class="form-input" placeholder="e.g. 120 min">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Synopsis</label>
+                <textarea id="film-synopsis" class="form-textarea" rows="3"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Theme Fit</label>
+                <textarea id="film-theme-fit" class="form-textarea" rows="2"></textarea>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Festival Year</label>
+                  <input type="text" id="film-festival-year" class="form-input" placeholder="e.g. 2026">
+                </div>
+                <div class="form-group">
+                  <label class="toggle-label" style="margin-top:24px;">
+                    <input type="checkbox" id="film-winner" class="toggle-input">
+                    <span class="toggle-switch"></span>
+                    <span class="toggle-text">Festival Winner</span>
+                  </label>
+                </div>
+              </div>
+              <div class="admin-form-actions">
+                <button type="submit" class="btn btn--submit" style="width:auto;">Save Film</button>
+                <button type="button" class="btn btn--outline" id="cancel-film-btn">Cancel</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Films List -->
+          <div id="films-list" class="admin-list"></div>
+        </div>
+
+        <!-- Voting Tab -->
+        <div class="admin-panel" id="panel-voting" hidden>
+          <div class="admin-panel-header">
+            <h2>Manage Voting</h2>
+          </div>
+
+          <!-- Voting Controls -->
+          <div class="admin-card">
+            <h3>Voting Status</h3>
+            <div class="admin-status-row">
+              <label class="toggle-label">
+                <input type="checkbox" id="voting-open-toggle" class="toggle-input">
+                <span class="toggle-switch"></span>
+                <span class="toggle-text">Voting is Open</span>
+              </label>
+            </div>
+            <div class="form-row" style="margin-top:var(--space-sm);">
+              <div class="form-group">
+                <label class="form-label">Voting Opens</label>
+                <input type="date" id="voting-open-date" class="form-input" value="2026-06-01">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Voting Closes</label>
+                <input type="date" id="voting-close-date" class="form-input" value="2026-06-30">
+              </div>
+            </div>
+          </div>
+
+          <!-- Votes List -->
+          <div class="admin-card">
+            <h3>Submitted Votes (<span id="vote-count">0</span>)</h3>
+            <div id="admin-votes-list" class="admin-list"></div>
+          </div>
+
+          <!-- Write-in Suggestions -->
+          <div class="admin-card">
+            <h3>Write-in Suggestions (<span id="suggestion-count">0</span>)</h3>
+            <div id="admin-suggestions-list" class="admin-list"></div>
+          </div>
+        </div>
+
+        <!-- Quotes Tab -->
+        <div class="admin-panel" id="panel-quotes" hidden>
+          <div class="admin-panel-header">
+            <h2>Manage Quotes</h2>
+            <button class="btn btn--submit" style="width:auto;" id="add-quote-btn">+ Add Quote</button>
+          </div>
+
+          <!-- Add/Edit Quote Form -->
+          <div id="quote-form-section" class="admin-form-section" hidden>
+            <h3 id="quote-form-title">Add New Quote</h3>
+            <form id="quote-form" class="admin-form">
+              <input type="hidden" id="quote-edit-id">
+              <div class="form-group">
+                <label class="form-label">Quote Text <span class="required">*</span></label>
+                <textarea id="quote-text-input" class="form-textarea" rows="3" required></textarea>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Said By</label>
+                  <input type="text" id="quote-person-input" class="form-input">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Film / Context</label>
+                  <input type="text" id="quote-film-input" class="form-input">
+                </div>
+              </div>
+              <div class="form-group form-group--small">
+                <label class="form-label">Year</label>
+                <input type="text" id="quote-year-input" class="form-input">
+              </div>
+              <div class="admin-form-actions">
+                <button type="submit" class="btn btn--submit" style="width:auto;">Save Quote</button>
+                <button type="button" class="btn btn--outline" id="cancel-quote-btn">Cancel</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Quotes List -->
+          <div id="admin-quotes-list" class="admin-list"></div>
+        </div>
+
+        <!-- Content Tab -->
+        <div class="admin-panel" id="panel-content" hidden>
+          <div class="admin-panel-header">
+            <h2>Manage Content</h2>
+          </div>
+
+          <div class="admin-card">
+            <h3>Homepage Settings</h3>
+            <form id="content-form" class="admin-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Festival Year</label>
+                  <input type="text" id="content-year" class="form-input" value="2026">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Theme</label>
+                  <input type="text" id="content-theme" class="form-input" value="Theme TBA">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Start Date</label>
+                  <input type="text" id="content-start-date" class="form-input" value="July 4">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">End Date</label>
+                  <input type="text" id="content-end-date" class="form-input" value="July 11">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Announcement</label>
+                <textarea id="content-announcement" class="form-textarea" rows="3" placeholder="Optional announcement to display on the homepage"></textarea>
+              </div>
+              <button type="submit" class="btn btn--submit" style="width:auto;">Save Settings</button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+  </div><!-- end admin-dashboard -->
+
+  <script src="admin.js"></script>
+</body>
+</html>
