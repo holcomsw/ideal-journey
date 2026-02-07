@@ -1,0 +1,605 @@
+/* ============================================
+   Elk Rapids Film Festival
+   A celebration of Michigan summers & cinema
+   ============================================ */
+
+/* --- Reset & Base --- */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --color-navy: #1a2744;
+  --color-navy-deep: #0f1a2e;
+  --color-gold: #d4a843;
+  --color-gold-light: #e8c96a;
+  --color-cream: #faf6ee;
+  --color-cream-dark: #f0e8d8;
+  --color-lake: #3d7a8a;
+  --color-lake-light: #5a9dab;
+  --color-sunset: #c75c3a;
+  --color-text: #2c2c2c;
+  --color-text-light: #5a5a5a;
+  --color-white: #ffffff;
+
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Source Sans 3', 'Segoe UI', sans-serif;
+
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 2rem;
+  --space-lg: 4rem;
+  --space-xl: 6rem;
+  --space-2xl: 8rem;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background: var(--color-cream);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+}
+
+/* --- Typography --- */
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.section-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  color: var(--color-navy);
+  margin-bottom: var(--space-sm);
+  text-align: center;
+}
+
+.section-intro {
+  text-align: center;
+  color: var(--color-text-light);
+  font-size: 1.15rem;
+  max-width: 600px;
+  margin: 0 auto var(--space-lg);
+}
+
+/* --- Navigation --- */
+.nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-md);
+  z-index: 10;
+}
+
+.nav-link {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: color 0.3s;
+}
+
+.nav-link:hover {
+  color: var(--color-gold-light);
+}
+
+/* --- Hero --- */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background:
+    linear-gradient(
+      180deg,
+      var(--color-navy-deep) 0%,
+      #1e3a5f 30%,
+      #2a5a6a 50%,
+      #d4885a 75%,
+      #e8a84c 90%,
+      #d4a843 100%
+    );
+  color: var(--color-white);
+  overflow: hidden;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 80%, rgba(212, 168, 67, 0.15) 0%, transparent 60%),
+    radial-gradient(ellipse at 50% 0%, rgba(15, 26, 46, 0.4) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  padding: var(--space-md);
+}
+
+.hero-tagline {
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-gold-light);
+  margin-bottom: var(--space-sm);
+  font-weight: 600;
+}
+
+.hero-title {
+  font-size: clamp(2.8rem, 8vw, 5.5rem);
+  font-weight: 700;
+  line-height: 1.05;
+  margin-bottom: var(--space-md);
+  text-shadow: 0 2px 30px rgba(0,0,0,0.3);
+}
+
+.hero-subtitle {
+  font-size: clamp(1rem, 2.5vw, 1.35rem);
+  font-weight: 300;
+  opacity: 0.9;
+  max-width: 500px;
+  margin: 0 auto var(--space-sm);
+}
+
+.hero-dates {
+  font-size: 0.95rem;
+  letter-spacing: 0.1em;
+  color: var(--color-gold-light);
+  font-weight: 600;
+}
+
+/* Scroll indicator */
+.scroll-indicator {
+  position: absolute;
+  bottom: var(--space-md);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+.scroll-indicator span {
+  display: block;
+  width: 24px;
+  height: 38px;
+  border: 2px solid rgba(255,255,255,0.5);
+  border-radius: 12px;
+  position: relative;
+}
+
+.scroll-indicator span::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 8px;
+  background: rgba(255,255,255,0.7);
+  border-radius: 2px;
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  50% { opacity: 0.3; transform: translateX(-50%) translateY(10px); }
+}
+
+/* --- Sections --- */
+.section {
+  padding: var(--space-xl) 0;
+}
+
+/* --- About --- */
+.about {
+  background: var(--color-white);
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: var(--space-lg);
+  align-items: center;
+  margin-top: var(--space-lg);
+}
+
+.about-text .lead {
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: var(--color-navy);
+  line-height: 1.8;
+  margin-bottom: var(--space-md);
+  font-family: var(--font-display);
+  font-style: italic;
+}
+
+.about-text p {
+  margin-bottom: var(--space-sm);
+  color: var(--color-text-light);
+  font-size: 1.05rem;
+}
+
+.about-card {
+  display: flex;
+  justify-content: center;
+}
+
+.about-card-inner {
+  background: var(--color-navy);
+  color: var(--color-cream);
+  border-radius: 16px;
+  padding: var(--space-lg) var(--space-md);
+  text-align: center;
+  width: 100%;
+  max-width: 360px;
+}
+
+.film-icon {
+  color: var(--color-gold);
+  margin-bottom: var(--space-md);
+}
+
+.stat-row {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-md);
+}
+
+.stat-row:last-child {
+  margin-bottom: 0;
+}
+
+.stat-number {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-gold);
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(250, 246, 238, 0.6);
+  margin-top: 2px;
+}
+
+/* --- Timeline / Years --- */
+.years {
+  background: var(--color-cream);
+}
+
+.timeline {
+  position: relative;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: var(--space-md) 0;
+}
+
+.timeline-line {
+  position: absolute;
+  left: 40px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--color-gold), var(--color-lake), var(--color-gold));
+  opacity: 0.4;
+}
+
+.timeline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+  position: relative;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.timeline-item.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.timeline-year {
+  flex-shrink: 0;
+  width: 80px;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-navy);
+  text-align: center;
+  position: relative;
+}
+
+.timeline-year::after {
+  content: '';
+  position: absolute;
+  right: -13px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  background: var(--color-gold);
+  border-radius: 50%;
+  border: 2px solid var(--color-cream);
+}
+
+.timeline-card {
+  background: var(--color-white);
+  border-radius: 12px;
+  padding: var(--space-sm) calc(var(--space-sm) * 1.5);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  flex: 1;
+  border-left: 3px solid var(--color-gold);
+}
+
+.timeline-card h3 {
+  font-size: 1.05rem;
+  color: var(--color-navy);
+  margin-bottom: 4px;
+}
+
+.timeline-card p {
+  color: var(--color-text-light);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* --- Highlights --- */
+.highlights {
+  background: var(--color-white);
+}
+
+.highlights-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+}
+
+.highlight-card {
+  background: var(--color-cream);
+  border-radius: 16px;
+  padding: var(--space-md) calc(var(--space-md) * 1.25);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.highlight-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+}
+
+.highlight-featured {
+  grid-column: 1 / -1;
+  background: var(--color-navy);
+  color: var(--color-cream);
+}
+
+.highlight-featured .highlight-icon {
+  color: var(--color-gold);
+}
+
+.highlight-featured h3 {
+  color: var(--color-gold-light);
+}
+
+.highlight-featured p {
+  color: rgba(250, 246, 238, 0.8);
+}
+
+.highlight-icon {
+  color: var(--color-lake);
+  margin-bottom: var(--space-sm);
+}
+
+.highlight-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  margin-bottom: var(--space-xs);
+  color: var(--color-navy);
+}
+
+.highlight-card p {
+  color: var(--color-text-light);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+/* --- Traditions --- */
+.traditions {
+  background: var(--color-cream);
+}
+
+.traditions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+}
+
+.tradition {
+  padding: var(--space-md);
+  border-radius: 12px;
+  background: var(--color-white);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  transition: transform 0.3s ease;
+}
+
+.tradition:hover {
+  transform: translateY(-3px);
+}
+
+.tradition-number {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-gold);
+  line-height: 1;
+  margin-bottom: var(--space-xs);
+}
+
+.tradition h3 {
+  font-size: 1.2rem;
+  color: var(--color-navy);
+  margin-bottom: var(--space-xs);
+}
+
+.tradition p {
+  color: var(--color-text-light);
+  font-size: 0.95rem;
+}
+
+/* --- Michigan Quote --- */
+.michigan {
+  background: var(--color-navy);
+  padding: var(--space-2xl) 0;
+}
+
+.michigan-quote {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.michigan-quote p {
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 3vw, 1.8rem);
+  font-style: italic;
+  color: var(--color-cream);
+  line-height: 1.8;
+}
+
+/* --- Footer --- */
+.footer {
+  background: var(--color-navy-deep);
+  color: rgba(250, 246, 238, 0.6);
+  padding: var(--space-lg) 0 var(--space-md);
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  margin-bottom: var(--space-md);
+}
+
+.footer-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  color: var(--color-cream);
+  margin-bottom: 4px;
+}
+
+.footer-location {
+  font-size: 0.9rem;
+}
+
+.footer-details {
+  text-align: right;
+  font-size: 0.9rem;
+}
+
+.footer-details p {
+  margin-bottom: 4px;
+}
+
+.footer-bottom {
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .nav {
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+  }
+
+  .nav-link {
+    font-size: 0.75rem;
+  }
+
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  .highlights-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .traditions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .timeline-line {
+    left: 36px;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--space-sm);
+  }
+
+  .footer-details {
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .timeline-item {
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding-left: 60px;
+  }
+
+  .timeline-year {
+    width: auto;
+    text-align: left;
+  }
+
+  .timeline-year::after {
+    right: auto;
+    left: -32px;
+  }
+
+  .timeline-line {
+    left: 20px;
+  }
+}
