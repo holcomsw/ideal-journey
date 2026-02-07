@@ -120,6 +120,39 @@
     });
   }
 
+  // --- Rotating Quotes (Homepage) ---
+  var QUOTES = [
+    { text: 'Who knew watching Jaws on the lake could be so terrifyingly perfect?', attr: 'Elk Rapids Film Festival, 2018' },
+    { text: 'This is what summer is all about.', attr: 'Elk Rapids Film Festival' },
+    { text: 'I can\'t believe they let us rent an entire theater for this.', attr: 'Elk Rapids Film Festival' },
+    { text: 'The yacht rock screening was peak cinema. Fight me.', attr: 'Elk Rapids Film Festival, 2022' },
+    { text: 'Sixteen years later and the wives still roll their eyes. But they never miss a screening.', attr: 'Elk Rapids Film Festival' },
+    { text: 'There\'s no better place to watch a movie than on a lake in Michigan.', attr: 'Elk Rapids Film Festival' }
+  ];
+
+  function initRotatingQuotes() {
+    var quoteEl = document.getElementById('rotating-quote');
+    if (!quoteEl) return;
+
+    var attrEl = quoteEl.nextElementSibling;
+    var index = Math.floor(Math.random() * QUOTES.length);
+
+    // Set initial random quote
+    quoteEl.querySelector('p').textContent = QUOTES[index].text;
+    if (attrEl) attrEl.innerHTML = '&mdash; ' + QUOTES[index].attr;
+
+    // Rotate every 8 seconds
+    setInterval(function () {
+      index = (index + 1) % QUOTES.length;
+      quoteEl.style.opacity = '0';
+      setTimeout(function () {
+        quoteEl.querySelector('p').textContent = QUOTES[index].text;
+        if (attrEl) attrEl.innerHTML = '&mdash; ' + QUOTES[index].attr;
+        quoteEl.style.opacity = '1';
+      }, 500);
+    }, 8000);
+  }
+
   // --- Voting System ---
   var VOTES_KEY = 'erff_votes';
   var SUGGESTIONS_KEY = 'erff_suggestions';
@@ -367,6 +400,7 @@
     initScrollAnimations();
     initSmoothScroll();
     initHeroParallax();
+    initRotatingQuotes();
     initVotingSystem();
   });
 })();
