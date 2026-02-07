@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quote Wall &mdash; Elk Rapids Film Festival</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Password Gate -->
+  <div id="login-gate" class="login-gate">
+    <div class="login-overlay"></div>
+    <div class="login-content">
+      <div class="login-icon" aria-hidden="true">
+        <svg viewBox="0 0 100 100" width="64" height="64">
+          <rect x="10" y="15" width="80" height="70" rx="4" fill="none" stroke="currentColor" stroke-width="3"/>
+          <rect x="10" y="15" width="80" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="3"/>
+          <line x1="30" y1="15" x2="30" y2="31" stroke="currentColor" stroke-width="3"/>
+          <line x1="50" y1="15" x2="50" y2="31" stroke="currentColor" stroke-width="3"/>
+          <line x1="70" y1="15" x2="70" y2="31" stroke="currentColor" stroke-width="3"/>
+          <polygon points="42,50 42,72 62,61" fill="currentColor"/>
+        </svg>
+      </div>
+      <h1 class="login-title">The Elk Rapids<br>Film Festival</h1>
+      <p class="login-tagline">A Celebration of Cinema &amp; Friendship</p>
+      <form id="login-form" class="login-form">
+        <div class="login-field">
+          <input type="password" id="login-password" class="login-input" placeholder="Enter password" autocomplete="off" required>
+          <button type="submit" class="login-button">Enter</button>
+        </div>
+        <p id="login-error" class="login-error" hidden>Incorrect password. Please try again.</p>
+      </form>
+      <p class="login-hint">Family &amp; friends only</p>
+    </div>
+  </div>
+
+  <!-- Site Content -->
+  <div id="site-content" class="site-content site-content--locked">
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="page-header-bg"></div>
+    <nav class="nav nav--dark">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="about.html" class="nav-link">Our Story</a>
+      <a href="archive.html" class="nav-link">Films</a>
+      <a href="gallery.html" class="nav-link">Gallery</a>
+      <a href="quotes.html" class="nav-link nav-link--active">Quotes</a>
+      <a href="vote.html" class="nav-link">Vote</a>
+    </nav>
+    <div class="page-header-content">
+      <p class="page-header-label">Elk Rapids Film Festival</p>
+      <h1 class="page-header-title">Quote Wall</h1>
+      <p class="page-header-subtitle">The things we said. The things we'll never forget.</p>
+    </div>
+  </header>
+
+  <!-- Featured Quote -->
+  <section class="section quotes-featured">
+    <div class="container">
+      <div class="featured-quote-card">
+        <div class="featured-quote-mark" aria-hidden="true">&ldquo;</div>
+        <blockquote class="featured-quote-text">
+          <p>There's something about a Michigan summer &mdash; the light on the lake, the sound of the water, the long golden evenings &mdash; that makes everything you watch together feel like it matters more.</p>
+        </blockquote>
+        <div class="featured-quote-meta">
+          <span class="featured-quote-person">The Founders</span>
+          <span class="featured-quote-film">Elk Rapids Film Festival</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters -->
+  <section class="quotes-filter-bar">
+    <div class="container">
+      <div class="quotes-filters">
+        <div class="quotes-filter-group">
+          <label for="quotes-year-filter" class="form-label">Year</label>
+          <select id="quotes-year-filter" class="form-select">
+            <option value="all">All Years</option>
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+            <option value="2023">2023</option>
+            <option value="2022">2022</option>
+            <option value="2021">2021</option>
+            <option value="2020">2020</option>
+            <option value="2019">2019</option>
+            <option value="2018">2018</option>
+          </select>
+        </div>
+        <div class="quotes-filter-group">
+          <label for="quotes-person-filter" class="form-label">Person</label>
+          <select id="quotes-person-filter" class="form-select">
+            <option value="all">Everyone</option>
+          </select>
+        </div>
+        <div class="quotes-filter-group">
+          <label for="quotes-film-filter" class="form-label">Film</label>
+          <select id="quotes-film-filter" class="form-select">
+            <option value="all">All Films</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quote Wall -->
+  <section class="section quotes-wall-section">
+    <div class="container">
+      <div class="quotes-wall" id="quotes-wall">
+
+        <div class="quote-card quote-card--lake" data-year="2018" data-person="Festival" data-film="Jaws">
+          <div class="quote-card-mark">&ldquo;</div>
+          <p class="quote-card-text">Who knew watching Jaws on the lake could be so terrifyingly perfect?</p>
+          <div class="quote-card-meta">
+            <span class="quote-card-person">Festival Memory</span>
+            <span class="quote-card-detail">Jaws &middot; 2018</span>
+          </div>
+        </div>
+
+        <div class="quote-card quote-card--sunset" data-year="2022" data-person="Festival" data-film="Yacht Rock">
+          <div class="quote-card-mark">&ldquo;</div>
+          <p class="quote-card-text">The yacht rock screening was peak cinema. Fight me.</p>
+          <div class="quote-card-meta">
+            <span class="quote-card-person">Festival Memory</span>
+            <span class="quote-card-detail">Yacht Rock Summer &middot; 2022</span>
+          </div>
+        </div>
+
+        <div class="quote-card quote-card--navy" data-year="2023" data-person="Festival" data-film="General">
+          <div class="quote-card-mark">&ldquo;</div>
+          <p class="quote-card-text">I can't believe they let us rent an entire theater for this.</p>
+          <div class="quote-card-meta">
+            <span class="quote-card-person">Festival Memory</span>
+            <span class="quote-card-detail">Theater Takeover &middot; 2023</span>
+          </div>
+        </div>
+
+        <div class="quote-card quote-card--pine" data-year="2019" data-person="Festival" data-film="General">
+          <div class="quote-card-mark">&ldquo;</div>
+          <p class="quote-card-text">Ten years. Same friends. Same lake. How did we get so lucky?</p>
+          <div class="quote-card-meta">
+            <span class="quote-card-person">Festival Memory</span>
+            <span class="quote-card-detail">10th Anniversary &middot; 2019</span>
+          </div>
+        </div>
+
+        <div class="quote-card quote-card--gold" data-year="2020" data-person="Festival" data-film="General">
+          <div class="quote-card-mark">&ldquo;</div>
+          <p class="quote-card-text">Some traditions are too important to skip. Even this year.</p>
+          <div class="quote-card-meta">
+            <span class="quote-card-person">Festival Memory</span>
+            <span class="quote-card-detail">2020</span>
+          </div>
+        </div>
+
+        <div class="quote-card quote-card--sunset" data-year="2024" data-person="Festival" data-film="General">
+          <div class="quote-card-mark">&ldquo;</div>
+          <p class="quote-card-text">This is what summer is all about.</p>
+          <div class="quote-card-meta">
+            <span class="quote-card-person">Festival Memory</span>
+            <span class="quote-card-detail">2024</span>
+          </div>
+        </div>
+
+        <div class="quote-card quote-card--lake" data-year="2021" data-person="Festival" data-film="General">
+          <div class="quote-card-mark">&ldquo;</div>
+          <p class="quote-card-text">Being back together hits different after a year apart.</p>
+          <div class="quote-card-meta">
+            <span class="quote-card-person">Festival Memory</span>
+            <span class="quote-card-detail">The Reunion &middot; 2021</span>
+          </div>
+        </div>
+
+        <div class="quote-card quote-card--navy" data-year="2025" data-person="Festival" data-film="General">
+          <div class="quote-card-mark">&ldquo;</div>
+          <p class="quote-card-text">Sixteen years later and the wives still roll their eyes. But they never miss a screening.</p>
+          <div class="quote-card-meta">
+            <span class="quote-card-person">Festival Memory</span>
+            <span class="quote-card-detail">2025</span>
+          </div>
+        </div>
+
+        <div class="quote-card quote-card--pine" data-year="2018" data-person="Festival" data-film="Jaws">
+          <div class="quote-card-mark">&ldquo;</div>
+          <p class="quote-card-text">There's no better place to watch a movie than on a lake in Michigan.</p>
+          <div class="quote-card-meta">
+            <span class="quote-card-person">Festival Memory</span>
+            <span class="quote-card-detail">Jaws on the Lake &middot; 2018</span>
+          </div>
+        </div>
+
+        <div class="quote-card quote-card--gold" data-year="2022" data-person="Festival" data-film="Yacht Rock">
+          <div class="quote-card-mark">&ldquo;</div>
+          <p class="quote-card-text">Smooth sailing, smoother soundtracks.</p>
+          <div class="quote-card-meta">
+            <span class="quote-card-person">Festival Memory</span>
+            <span class="quote-card-detail">Yacht Rock Summer &middot; 2022</span>
+          </div>
+        </div>
+
+        <div class="quote-card quote-card--sunset" data-year="2010" data-person="The Wives" data-film="General">
+          <div class="quote-card-mark">&ldquo;</div>
+          <p class="quote-card-text">A whole week? Just watching movies? This is a terrible idea.</p>
+          <div class="quote-card-meta">
+            <span class="quote-card-person">The Wives</span>
+            <span class="quote-card-detail">The Inaugural Year &middot; 2010</span>
+          </div>
+        </div>
+
+        <div class="quote-card quote-card--lake" data-year="2024" data-person="Festival" data-film="General">
+          <div class="quote-card-mark">&ldquo;</div>
+          <p class="quote-card-text">The debates about which film should have won are half the fun.</p>
+          <div class="quote-card-meta">
+            <span class="quote-card-person">Festival Memory</span>
+            <span class="quote-card-detail">2024</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <p class="footer-title">The Elk Rapids Film Festival</p>
+          <p class="footer-location">Elk Rapids, Michigan</p>
+        </div>
+        <div class="footer-details">
+          <p>Est. 2010 &middot; Three Friends &middot; Sixteen Summers</p>
+          <p>July 4&ndash;11, Every Year</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2010&ndash;2026 The Elk Rapids Film Festival. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  </div><!-- end #site-content -->
+
+  <script src="script.js"></script>
+</body>
+</html>

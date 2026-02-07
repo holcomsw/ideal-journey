@@ -445,6 +445,61 @@
     if (winnersToggle) winnersToggle.addEventListener('change', applyFilters);
   }
 
+  // --- Quote Wall Filters ---
+  function initQuoteWall() {
+    var yearFilter = document.getElementById('quotes-year-filter');
+    var personFilter = document.getElementById('quotes-person-filter');
+    var filmFilter = document.getElementById('quotes-film-filter');
+    var cards = document.querySelectorAll('.quote-card');
+    if (!yearFilter || !cards.length) return;
+
+    // Populate person and film filters from data
+    var people = new Set();
+    var films = new Set();
+    cards.forEach(function (card) {
+      var person = card.getAttribute('data-person');
+      var film = card.getAttribute('data-film');
+      if (person) people.add(person);
+      if (film) films.add(film);
+    });
+
+    people.forEach(function (p) {
+      var opt = document.createElement('option');
+      opt.value = p;
+      opt.textContent = p;
+      personFilter.appendChild(opt);
+    });
+
+    films.forEach(function (f) {
+      var opt = document.createElement('option');
+      opt.value = f;
+      opt.textContent = f;
+      filmFilter.appendChild(opt);
+    });
+
+    function applyFilters() {
+      var year = yearFilter.value;
+      var person = personFilter.value;
+      var film = filmFilter.value;
+
+      cards.forEach(function (card) {
+        var yearMatch = year === 'all' || card.getAttribute('data-year') === year;
+        var personMatch = person === 'all' || card.getAttribute('data-person') === person;
+        var filmMatch = film === 'all' || card.getAttribute('data-film') === film;
+
+        if (yearMatch && personMatch && filmMatch) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    }
+
+    yearFilter.addEventListener('change', applyFilters);
+    personFilter.addEventListener('change', applyFilters);
+    filmFilter.addEventListener('change', applyFilters);
+  }
+
   // --- Gallery & Lightbox ---
   function initGallery() {
     var filterBtns = document.querySelectorAll('.gallery-filter-btn');
@@ -548,5 +603,6 @@
     initVotingSystem();
     initArchiveFilters();
     initGallery();
+    initQuoteWall();
   });
 })();

@@ -1332,6 +1332,165 @@ h1, h2, h3 {
   margin-top: var(--space-sm);
 }
 
+/* ============================================
+   Quote Wall Page
+   ============================================ */
+
+/* --- Featured Quote --- */
+.quotes-featured {
+  background: var(--color-navy);
+  padding: var(--space-xl) 0;
+}
+
+.featured-quote-card {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+}
+
+.featured-quote-mark {
+  font-family: var(--font-display);
+  font-size: 8rem;
+  color: var(--color-gold);
+  opacity: 0.2;
+  line-height: 0.3;
+  margin-bottom: var(--space-sm);
+}
+
+.featured-quote-text p {
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 3vw, 2rem);
+  font-style: italic;
+  color: var(--color-cream);
+  line-height: 1.7;
+}
+
+.featured-quote-meta {
+  margin-top: var(--space-md);
+  display: flex;
+  justify-content: center;
+  gap: var(--space-sm);
+  font-size: 0.9rem;
+}
+
+.featured-quote-person {
+  color: var(--color-gold-light);
+  font-weight: 600;
+}
+
+.featured-quote-film {
+  color: rgba(245, 239, 227, 0.5);
+}
+
+/* --- Quote Filters --- */
+.quotes-filter-bar {
+  background: var(--color-white);
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-cream-dark);
+}
+
+.quotes-filters {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.quotes-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* --- Quote Wall Grid --- */
+.quotes-wall-section {
+  background: var(--color-cream);
+}
+
+.quotes-wall {
+  columns: 3;
+  column-gap: var(--space-sm);
+}
+
+.quote-card {
+  break-inside: avoid;
+  margin-bottom: var(--space-sm);
+  border-radius: 14px;
+  padding: var(--space-md);
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+.quote-card:hover {
+  transform: translateY(-3px);
+}
+
+.quote-card.hidden {
+  display: none;
+}
+
+/* Color variants */
+.quote-card--lake {
+  background: var(--color-lake);
+  color: var(--color-white);
+}
+
+.quote-card--navy {
+  background: var(--color-navy);
+  color: var(--color-cream);
+}
+
+.quote-card--sunset {
+  background: var(--color-sunset);
+  color: var(--color-white);
+}
+
+.quote-card--pine {
+  background: var(--color-pine);
+  color: var(--color-white);
+}
+
+.quote-card--gold {
+  background: var(--color-gold);
+  color: var(--color-navy-deep);
+}
+
+.quote-card-mark {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  opacity: 0.25;
+  line-height: 0.5;
+  margin-bottom: var(--space-xs);
+}
+
+.quote-card-text {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-style: italic;
+  line-height: 1.6;
+  margin-bottom: var(--space-sm);
+}
+
+.quote-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.quote-card-person {
+  font-weight: 600;
+}
+
+.quote-card--gold .quote-card-mark {
+  opacity: 0.35;
+}
+
+.quote-card--gold .quote-card-meta {
+  opacity: 0.8;
+}
+
 /* --- Footer --- */
 .footer {
   background: var(--color-navy-deep);
@@ -1887,6 +2046,10 @@ h1, h2, h3 {
     columns: 2;
   }
 
+  .quotes-wall {
+    columns: 2;
+  }
+
   .founders-grid {
     grid-template-columns: 1fr;
     max-width: 320px;
@@ -1981,6 +2144,14 @@ h1, h2, h3 {
 
   .masonry-grid {
     columns: 1;
+  }
+
+  .quotes-wall {
+    columns: 1;
+  }
+
+  .quotes-filters {
+    flex-direction: column;
   }
 
   .moment-item {
