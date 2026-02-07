@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gallery &mdash; Elk Rapids Film Festival</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Password Gate -->
+  <div id="login-gate" class="login-gate">
+    <div class="login-overlay"></div>
+    <div class="login-content">
+      <div class="login-icon" aria-hidden="true">
+        <svg viewBox="0 0 100 100" width="64" height="64">
+          <rect x="10" y="15" width="80" height="70" rx="4" fill="none" stroke="currentColor" stroke-width="3"/>
+          <rect x="10" y="15" width="80" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="3"/>
+          <line x1="30" y1="15" x2="30" y2="31" stroke="currentColor" stroke-width="3"/>
+          <line x1="50" y1="15" x2="50" y2="31" stroke="currentColor" stroke-width="3"/>
+          <line x1="70" y1="15" x2="70" y2="31" stroke="currentColor" stroke-width="3"/>
+          <polygon points="42,50 42,72 62,61" fill="currentColor"/>
+        </svg>
+      </div>
+      <h1 class="login-title">The Elk Rapids<br>Film Festival</h1>
+      <p class="login-tagline">A Celebration of Cinema &amp; Friendship</p>
+      <form id="login-form" class="login-form">
+        <div class="login-field">
+          <input type="password" id="login-password" class="login-input" placeholder="Enter password" autocomplete="off" required>
+          <button type="submit" class="login-button">Enter</button>
+        </div>
+        <p id="login-error" class="login-error" hidden>Incorrect password. Please try again.</p>
+      </form>
+      <p class="login-hint">Family &amp; friends only</p>
+    </div>
+  </div>
+
+  <!-- Site Content -->
+  <div id="site-content" class="site-content site-content--locked">
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="page-header-bg"></div>
+    <nav class="nav nav--dark">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="about.html" class="nav-link">Our Story</a>
+      <a href="archive.html" class="nav-link">Films</a>
+      <a href="gallery.html" class="nav-link nav-link--active">Gallery</a>
+      <a href="quotes.html" class="nav-link">Quotes</a>
+      <a href="vote.html" class="nav-link">Vote</a>
+    </nav>
+    <div class="page-header-content">
+      <p class="page-header-label">Elk Rapids Film Festival</p>
+      <h1 class="page-header-title">Gallery</h1>
+      <p class="page-header-subtitle">Sixteen years of sunsets, screenings, and summer nights.</p>
+    </div>
+  </header>
+
+  <!-- Featured Trailer -->
+  <section class="section gallery-trailer">
+    <div class="container">
+      <div class="trailer-wrapper">
+        <div class="trailer-placeholder">
+          <div class="trailer-play-icon">
+            <svg viewBox="0 0 80 80" width="64" height="64"><circle cx="40" cy="40" r="36" fill="none" stroke="currentColor" stroke-width="3"/><polygon points="32,24 32,56 58,40" fill="currentColor"/></svg>
+          </div>
+          <h3>2026 Festival Trailer</h3>
+          <p>Coming Soon</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery Filters -->
+  <section class="gallery-filter-bar">
+    <div class="container">
+      <div class="gallery-filters">
+        <button class="gallery-filter-btn gallery-filter-btn--active" data-year="all">All Years</button>
+        <button class="gallery-filter-btn" data-year="2025">2025</button>
+        <button class="gallery-filter-btn" data-year="2024">2024</button>
+        <button class="gallery-filter-btn" data-year="2023">2023</button>
+        <button class="gallery-filter-btn" data-year="2022">2022</button>
+        <button class="gallery-filter-btn" data-year="2021">2021</button>
+        <button class="gallery-filter-btn" data-year="2020">2020</button>
+        <button class="gallery-filter-btn" data-year="2019">2019</button>
+        <button class="gallery-filter-btn" data-year="2018">2018</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Masonry Gallery -->
+  <section class="section gallery-masonry-section">
+    <div class="container">
+      <div class="masonry-grid" id="masonry-grid">
+
+        <!-- Photo placeholders with varying sizes -->
+        <div class="masonry-item masonry-item--tall" data-year="2025" data-type="photo" data-index="0">
+          <div class="masonry-placeholder">
+            <svg viewBox="0 0 64 64" width="32" height="32"><rect x="4" y="12" width="56" height="40" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="28" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 44 L20 32 L32 40 L44 28 L60 40 L60 48 Q60 52 56 52 L8 52 Q4 52 4 48 Z" fill="currentColor" opacity="0.3"/></svg>
+          </div>
+          <div class="masonry-caption"><span>Festival 2025</span></div>
+        </div>
+
+        <div class="masonry-item" data-year="2025" data-type="photo" data-index="1">
+          <div class="masonry-placeholder">
+            <svg viewBox="0 0 64 64" width="32" height="32"><rect x="4" y="12" width="56" height="40" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="28" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 44 L20 32 L32 40 L44 28 L60 40 L60 48 Q60 52 56 52 L8 52 Q4 52 4 48 Z" fill="currentColor" opacity="0.3"/></svg>
+          </div>
+          <div class="masonry-caption"><span>Screening night</span></div>
+        </div>
+
+        <div class="masonry-item" data-year="2024" data-type="video" data-index="2">
+          <div class="masonry-placeholder">
+            <svg viewBox="0 0 64 64" width="32" height="32"><rect x="4" y="12" width="56" height="40" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><polygon points="26,24 26,44 42,34" fill="currentColor"/></svg>
+          </div>
+          <div class="masonry-play-overlay">
+            <svg viewBox="0 0 48 48" width="36" height="36"><circle cx="24" cy="24" r="22" fill="rgba(0,0,0,0.5)" stroke="white" stroke-width="2"/><polygon points="20,14 20,34 36,24" fill="white"/></svg>
+          </div>
+          <div class="masonry-caption"><span>Festival Highlights 2024</span></div>
+        </div>
+
+        <div class="masonry-item masonry-item--wide" data-year="2022" data-type="photo" data-index="3">
+          <div class="masonry-placeholder">
+            <svg viewBox="0 0 64 64" width="32" height="32"><rect x="4" y="12" width="56" height="40" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="28" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 44 L20 32 L32 40 L44 28 L60 40 L60 48 Q60 52 56 52 L8 52 Q4 52 4 48 Z" fill="currentColor" opacity="0.3"/></svg>
+          </div>
+          <div class="masonry-caption"><span>Yacht Rock screening on the boat, 2022</span></div>
+        </div>
+
+        <div class="masonry-item" data-year="2022" data-type="photo" data-index="4">
+          <div class="masonry-placeholder">
+            <svg viewBox="0 0 64 64" width="32" height="32"><rect x="4" y="12" width="56" height="40" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="28" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 44 L20 32 L32 40 L44 28 L60 40 L60 48 Q60 52 56 52 L8 52 Q4 52 4 48 Z" fill="currentColor" opacity="0.3"/></svg>
+          </div>
+          <div class="masonry-caption"><span>Sunset over Elk Lake</span></div>
+        </div>
+
+        <div class="masonry-item masonry-item--tall" data-year="2018" data-type="photo" data-index="5">
+          <div class="masonry-placeholder">
+            <svg viewBox="0 0 64 64" width="32" height="32"><rect x="4" y="12" width="56" height="40" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="28" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 44 L20 32 L32 40 L44 28 L60 40 L60 48 Q60 52 56 52 L8 52 Q4 52 4 48 Z" fill="currentColor" opacity="0.3"/></svg>
+          </div>
+          <div class="masonry-caption"><span>Jaws on the Lake setup</span></div>
+        </div>
+
+        <div class="masonry-item" data-year="2018" data-type="photo" data-index="6">
+          <div class="masonry-placeholder">
+            <svg viewBox="0 0 64 64" width="32" height="32"><rect x="4" y="12" width="56" height="40" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="28" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 44 L20 32 L32 40 L44 28 L60 40 L60 48 Q60 52 56 52 L8 52 Q4 52 4 48 Z" fill="currentColor" opacity="0.3"/></svg>
+          </div>
+          <div class="masonry-caption"><span>The audience reacts</span></div>
+        </div>
+
+        <div class="masonry-item" data-year="2019" data-type="photo" data-index="7">
+          <div class="masonry-placeholder">
+            <svg viewBox="0 0 64 64" width="32" height="32"><rect x="4" y="12" width="56" height="40" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="28" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 44 L20 32 L32 40 L44 28 L60 40 L60 48 Q60 52 56 52 L8 52 Q4 52 4 48 Z" fill="currentColor" opacity="0.3"/></svg>
+          </div>
+          <div class="masonry-caption"><span>10th anniversary celebration</span></div>
+        </div>
+
+        <div class="masonry-item" data-year="2023" data-type="photo" data-index="8">
+          <div class="masonry-placeholder">
+            <svg viewBox="0 0 64 64" width="32" height="32"><rect x="4" y="12" width="56" height="40" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="28" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 44 L20 32 L32 40 L44 28 L60 40 L60 48 Q60 52 56 52 L8 52 Q4 52 4 48 Z" fill="currentColor" opacity="0.3"/></svg>
+          </div>
+          <div class="masonry-caption"><span>Theater takeover night</span></div>
+        </div>
+
+        <div class="masonry-item masonry-item--wide" data-year="2020" data-type="photo" data-index="9">
+          <div class="masonry-placeholder">
+            <svg viewBox="0 0 64 64" width="32" height="32"><rect x="4" y="12" width="56" height="40" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="28" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 44 L20 32 L32 40 L44 28 L60 40 L60 48 Q60 52 56 52 L8 52 Q4 52 4 48 Z" fill="currentColor" opacity="0.3"/></svg>
+          </div>
+          <div class="masonry-caption"><span>The year we adapted, 2020</span></div>
+        </div>
+
+        <div class="masonry-item" data-year="2021" data-type="photo" data-index="10">
+          <div class="masonry-placeholder">
+            <svg viewBox="0 0 64 64" width="32" height="32"><rect x="4" y="12" width="56" height="40" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="28" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 44 L20 32 L32 40 L44 28 L60 40 L60 48 Q60 52 56 52 L8 52 Q4 52 4 48 Z" fill="currentColor" opacity="0.3"/></svg>
+          </div>
+          <div class="masonry-caption"><span>Back together again</span></div>
+        </div>
+
+        <div class="masonry-item" data-year="2024" data-type="photo" data-index="11">
+          <div class="masonry-placeholder">
+            <svg viewBox="0 0 64 64" width="32" height="32"><rect x="4" y="12" width="56" height="40" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="28" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 44 L20 32 L32 40 L44 28 L60 40 L60 48 Q60 52 56 52 L8 52 Q4 52 4 48 Z" fill="currentColor" opacity="0.3"/></svg>
+          </div>
+          <div class="masonry-caption"><span>Lakeside projector setup</span></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox" hidden>
+    <div class="lightbox-backdrop"></div>
+    <button class="lightbox-close" aria-label="Close">&times;</button>
+    <button class="lightbox-prev" aria-label="Previous">&lsaquo;</button>
+    <button class="lightbox-next" aria-label="Next">&rsaquo;</button>
+    <div class="lightbox-content">
+      <div class="lightbox-image" id="lightbox-image">
+        <div class="masonry-placeholder" style="width:400px;height:300px;">
+          <svg viewBox="0 0 64 64" width="48" height="48"><rect x="4" y="12" width="56" height="40" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="28" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 44 L20 32 L32 40 L44 28 L60 40 L60 48 Q60 52 56 52 L8 52 Q4 52 4 48 Z" fill="currentColor" opacity="0.3"/></svg>
+        </div>
+      </div>
+      <p class="lightbox-caption" id="lightbox-caption"></p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <p class="footer-title">The Elk Rapids Film Festival</p>
+          <p class="footer-location">Elk Rapids, Michigan</p>
+        </div>
+        <div class="footer-details">
+          <p>Est. 2010 &middot; Three Friends &middot; Sixteen Summers</p>
+          <p>July 4&ndash;11, Every Year</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2010&ndash;2026 The Elk Rapids Film Festival. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  </div><!-- end #site-content -->
+
+  <script src="script.js"></script>
+</body>
+</html>
