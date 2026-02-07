@@ -11,6 +11,36 @@
 </head>
 <body>
 
+  <!-- Password Gate -->
+  <div id="login-gate" class="login-gate">
+    <div class="login-overlay"></div>
+    <div class="login-content">
+      <div class="login-icon" aria-hidden="true">
+        <svg viewBox="0 0 100 100" width="64" height="64">
+          <rect x="10" y="15" width="80" height="70" rx="4" fill="none" stroke="currentColor" stroke-width="3"/>
+          <rect x="10" y="15" width="80" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="3"/>
+          <line x1="30" y1="15" x2="30" y2="31" stroke="currentColor" stroke-width="3"/>
+          <line x1="50" y1="15" x2="50" y2="31" stroke="currentColor" stroke-width="3"/>
+          <line x1="70" y1="15" x2="70" y2="31" stroke="currentColor" stroke-width="3"/>
+          <polygon points="42,50 42,72 62,61" fill="currentColor"/>
+        </svg>
+      </div>
+      <h1 class="login-title">The Elk Rapids<br>Film Festival</h1>
+      <p class="login-tagline">A Celebration of Cinema &amp; Friendship</p>
+      <form id="login-form" class="login-form">
+        <div class="login-field">
+          <input type="password" id="login-password" class="login-input" placeholder="Enter password" autocomplete="off" required>
+          <button type="submit" class="login-button">Enter</button>
+        </div>
+        <p id="login-error" class="login-error" hidden>Incorrect password. Please try again.</p>
+      </form>
+      <p class="login-hint">Family &amp; friends only</p>
+    </div>
+  </div>
+
+  <!-- Site Content (hidden until authenticated) -->
+  <div id="site-content" class="site-content site-content--locked">
+
   <!-- Hero -->
   <header class="hero">
     <div class="hero-overlay"></div>
@@ -284,6 +314,8 @@
       </div>
     </div>
   </footer>
+
+  </div><!-- end #site-content -->
 
   <script src="script.js"></script>
 </body>

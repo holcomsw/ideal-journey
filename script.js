@@ -3,6 +3,56 @@
 (function () {
   'use strict';
 
+  // --- Password Gate ---
+  var PASSCODE = 'filmfest2026';
+  var SESSION_KEY = 'erff_authenticated';
+
+  function initLoginGate() {
+    var gate = document.getElementById('login-gate');
+    var content = document.getElementById('site-content');
+    var form = document.getElementById('login-form');
+    var input = document.getElementById('login-password');
+    var error = document.getElementById('login-error');
+
+    if (!gate || !content || !form) return;
+
+    // Check if already authenticated this session
+    if (sessionStorage.getItem(SESSION_KEY) === 'true') {
+      unlockSite(gate, content, false);
+      return;
+    }
+
+    // Focus the password input
+    input.focus();
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var value = input.value.trim();
+
+      if (value === PASSCODE) {
+        sessionStorage.setItem(SESSION_KEY, 'true');
+        unlockSite(gate, content, true);
+      } else {
+        error.hidden = false;
+        // Re-trigger shake animation
+        error.style.animation = 'none';
+        error.offsetHeight; // force reflow
+        error.style.animation = '';
+        input.value = '';
+        input.focus();
+      }
+    });
+  }
+
+  function unlockSite(gate, content, animate) {
+    content.classList.remove('site-content--locked');
+    if (animate) {
+      gate.classList.add('login-gate--hidden');
+    } else {
+      gate.style.display = 'none';
+    }
+  }
+
   // Scroll-triggered fade-in for timeline items
   function initScrollAnimations() {
     var items = document.querySelectorAll('.timeline-item');
@@ -72,6 +122,7 @@
 
   // Initialize
   document.addEventListener('DOMContentLoaded', function () {
+    initLoginGate();
     staggerTimeline();
     initScrollAnimations();
     initSmoothScroll();
