@@ -387,6 +387,64 @@
     }).join('');
   }
 
+  // --- Archive Filters ---
+  function initArchiveFilters() {
+    var yearSelect = document.getElementById('archive-year-select');
+    var searchInput = document.getElementById('archive-search');
+    var winnersToggle = document.getElementById('winners-only');
+    var noResults = document.getElementById('archive-no-results');
+    if (!yearSelect || !searchInput) return;
+
+    function applyFilters() {
+      var year = yearSelect.value;
+      var query = searchInput.value.trim().toLowerCase();
+      var winnersOnly = winnersToggle && winnersToggle.checked;
+      var yearBlocks = document.querySelectorAll('.archive-year-block');
+      var anyVisible = false;
+
+      yearBlocks.forEach(function (block) {
+        var blockYear = block.getAttribute('data-year');
+        var yearMatch = (year === 'all' || blockYear === year);
+
+        if (!yearMatch) {
+          block.classList.add('hidden');
+          return;
+        }
+
+        var films = block.querySelectorAll('.archive-film');
+        var anyFilmVisible = false;
+
+        films.forEach(function (film) {
+          var title = (film.querySelector('.archive-film-title') || {}).textContent || '';
+          var note = (film.querySelector('.archive-film-note') || {}).textContent || '';
+          var isWinner = film.getAttribute('data-winner') === 'true';
+          var textMatch = !query || title.toLowerCase().indexOf(query) !== -1 || note.toLowerCase().indexOf(query) !== -1;
+          var winnerMatch = !winnersOnly || isWinner;
+
+          if (textMatch && winnerMatch) {
+            film.classList.remove('hidden');
+            anyFilmVisible = true;
+          } else {
+            film.classList.add('hidden');
+          }
+        });
+
+        if (anyFilmVisible) {
+          block.classList.remove('hidden');
+          anyVisible = true;
+        } else {
+          block.classList.add('hidden');
+        }
+      });
+
+      if (noResults) noResults.hidden = anyVisible;
+    }
+
+    yearSelect.addEventListener('change', applyFilters);
+    searchInput.addEventListener('input', applyFilters);
+    if (winnersToggle) winnersToggle.addEventListener('change', applyFilters);
+  }
+
   function escapeHtml(str) {
     var div = document.createElement('div');
     div.appendChild(document.createTextNode(str));
@@ -402,5 +460,6 @@
     initHeroParallax();
     initRotatingQuotes();
     initVotingSystem();
+    initArchiveFilters();
   });
 })();
