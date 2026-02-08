@@ -1261,6 +1261,10 @@ h1, h2, h3 {
   justify-content: center;
 }
 
+.lightbox[hidden] {
+  display: none;
+}
+
 .lightbox-backdrop {
   position: absolute;
   inset: 0;
@@ -1759,6 +1763,20 @@ h1, h2, h3 {
 .footer-bottom {
   text-align: center;
   font-size: 0.8rem;
+}
+
+.footer-admin-link {
+  display: inline-block;
+  margin-top: var(--space-xs);
+  color: rgba(250, 246, 238, 0.25);
+  text-decoration: none;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  transition: color 0.3s;
+}
+
+.footer-admin-link:hover {
+  color: rgba(250, 246, 238, 0.6);
 }
 
 /* ============================================

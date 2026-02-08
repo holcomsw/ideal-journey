@@ -7,6 +7,7 @@
   var ADMIN_KEY = 'erff_admin_auth';
   var FILMS_KEY = 'erff_admin_films';
   var QUOTES_KEY = 'erff_admin_quotes';
+  var GALLERY_KEY = 'erff_admin_gallery';
   var CONTENT_KEY = 'erff_admin_content';
   var VOTES_KEY = 'erff_votes';
   var SUGGESTIONS_KEY = 'erff_suggestions';
@@ -45,6 +46,7 @@
     initTabs();
     initFilmsPanel();
     initVotingPanel();
+    initGalleryPanel();
     initQuotesPanel();
     initContentPanel();
 
@@ -224,6 +226,105 @@
     try { return JSON.parse(localStorage.getItem(SUGGESTIONS_KEY)) || []; }
     catch (e) { return []; }
   }
+
+  // --- Gallery ---
+  function getGalleryItems() {
+    try { return JSON.parse(localStorage.getItem(GALLERY_KEY)) || []; }
+    catch (e) { return []; }
+  }
+
+  function saveGalleryItems(items) {
+    localStorage.setItem(GALLERY_KEY, JSON.stringify(items));
+  }
+
+  function initGalleryPanel() {
+    var addBtn = document.getElementById('add-gallery-btn');
+    var cancelBtn = document.getElementById('cancel-gallery-btn');
+    var formSection = document.getElementById('gallery-form-section');
+    var form = document.getElementById('gallery-form');
+
+    addBtn.addEventListener('click', function () {
+      document.getElementById('gallery-form-title').textContent = 'Add Gallery Item';
+      form.reset();
+      document.getElementById('gallery-edit-id').value = '';
+      formSection.hidden = false;
+    });
+
+    cancelBtn.addEventListener('click', function () {
+      formSection.hidden = true;
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var items = getGalleryItems();
+      var editId = document.getElementById('gallery-edit-id').value;
+      var item = {
+        id: editId || Date.now().toString(),
+        caption: document.getElementById('gallery-caption').value.trim(),
+        year: document.getElementById('gallery-year-input').value.trim(),
+        type: document.getElementById('gallery-type').value,
+        url: document.getElementById('gallery-url').value.trim()
+      };
+
+      if (editId) {
+        items = items.map(function (g) { return g.id === editId ? item : g; });
+      } else {
+        items.push(item);
+      }
+
+      saveGalleryItems(items);
+      formSection.hidden = true;
+      renderGalleryList();
+    });
+
+    renderGalleryList();
+  }
+
+  function renderGalleryList() {
+    var items = getGalleryItems();
+    var container = document.getElementById('gallery-list');
+
+    if (!items.length) {
+      container.innerHTML = '<p class="admin-empty">No gallery items added yet.</p>';
+      return;
+    }
+
+    container.innerHTML = items.map(function (g) {
+      return '<div class="admin-list-item">' +
+        '<div class="admin-list-item-info">' +
+          '<strong>' + escapeHtml(g.caption) + '</strong>' +
+          ' <span class="admin-badge">' + escapeHtml(g.type) + '</span>' +
+          (g.year ? '<br><small>Year: ' + escapeHtml(g.year) + '</small>' : '') +
+          (g.url ? '<br><small>URL: ' + escapeHtml(g.url) + '</small>' : '') +
+        '</div>' +
+        '<div class="admin-list-item-actions">' +
+          '<button class="admin-btn-sm" onclick="window.editGalleryItem(\'' + g.id + '\')">Edit</button>' +
+          '<button class="admin-btn-sm admin-btn-sm--danger" onclick="window.deleteGalleryItem(\'' + g.id + '\')">Delete</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  window.editGalleryItem = function (id) {
+    var items = getGalleryItems();
+    var item = items.find(function (g) { return g.id === id; });
+    if (!item) return;
+
+    document.getElementById('gallery-form-title').textContent = 'Edit Gallery Item';
+    document.getElementById('gallery-edit-id').value = item.id;
+    document.getElementById('gallery-caption').value = item.caption || '';
+    document.getElementById('gallery-year-input').value = item.year || '';
+    document.getElementById('gallery-type').value = item.type || 'photo';
+    document.getElementById('gallery-url').value = item.url || '';
+    document.getElementById('gallery-form-section').hidden = false;
+  };
+
+  window.deleteGalleryItem = function (id) {
+    if (!confirm('Delete this gallery item?')) return;
+    var items = getGalleryItems().filter(function (g) { return g.id !== id; });
+    saveGalleryItems(items);
+    renderGalleryList();
+  };
 
   // --- Quotes ---
   function getQuotes() {
