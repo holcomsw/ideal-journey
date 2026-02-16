@@ -283,6 +283,10 @@ h1, h2, h3 {
   position: relative;
   z-index: 2;
   padding: var(--space-md);
+  padding-top: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .hero-poster {
@@ -466,6 +470,52 @@ h1, h2, h3 {
   margin-bottom: var(--space-sm);
   color: var(--color-text-light);
   font-size: 1.05rem;
+}
+
+.origin-subtitle {
+  font-style: italic;
+  font-family: var(--font-display);
+  color: var(--color-lake) !important;
+  font-size: 1.15rem !important;
+  margin-bottom: var(--space-md) !important;
+}
+
+.origin-heading {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  color: var(--color-navy);
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+.origin-milestones {
+  list-style: none;
+  padding: 0;
+  margin-bottom: var(--space-sm);
+}
+
+.origin-milestones li {
+  position: relative;
+  padding-left: 1.5rem;
+  margin-bottom: var(--space-sm);
+  color: var(--color-text-light);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.origin-milestones li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 8px;
+  height: 8px;
+  background: var(--color-gold);
+  border-radius: 50%;
+}
+
+.origin-milestones li strong {
+  color: var(--color-navy);
 }
 
 .btn--outline {
