@@ -592,6 +592,208 @@
     return div.innerHTML;
   }
 
+  // --- TMDB Movie Poster Loader ---
+  // Dynamically fetches movie poster images from The Movie Database (TMDB) API
+  // and replaces placeholder SVGs in the Films Archive page.
+  //
+  // HOW IT WORKS:
+  // 1. Finds all film cards on the archive page
+  // 2. Reads the movie title from each card
+  // 3. Searches TMDB API for that movie
+  // 4. Gets the poster_path from the API response
+  // 5. Builds the image URL: https://image.tmdb.org/t/p/w500/{poster_path}
+  // 6. Replaces the SVG placeholder with an <img> tag
+
+  var TMDB_API_KEY = '38a3eb613cba6a0465ff12b05dfa966b';
+  var TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
+  var TMDB_SEARCH_URL = 'https://api.themoviedb.org/3/search/movie';
+  var POSTER_CACHE_KEY = 'erff_poster_cache';
+
+  // Map of film titles to their specific release years for accurate TMDB lookup.
+  // This avoids matching remakes or sequels with the same name.
+  var FILM_YEAR_MAP = {
+    'Old School': 2003,
+    'The Other Guys': 2010,
+    'Step Brothers': 2008,
+    'Anchorman': 2004,
+    'Wedding Crashers': 2005,
+    'Talladega Nights: The Ballad of Ricky Bobby': 2006,
+    'Talladega Nights': 2006,
+    'Road House': 1989,
+    'Breakfast Club': 1985,
+    'Heathers': 1988,
+    'Back to the Future': 1985,
+    'Vacation': 1983,
+    'Axel F': 2024,
+    'Say Anything': 1989,
+    'Walk Hard': 2007,
+    'School of Rock': 2003,
+    'Caddy Shack': 1980,
+    'Caddyshack': 1980,
+    'Wet Hot American Summer': 2001,
+    'The Big Lebowski': 1998,
+    'Top Gun: Maverick': 2022,
+    'Rushmore': 1998,
+    'Book Smart': 2019,
+    'Booksmart': 2019,
+    'Wedding Singer': 1998,
+    'Forgetting Sarah Marshall': 2008,
+    'Jaws': 1975,
+    'Raiders of the Lost Ark': 1981,
+    'American Pie': 1999,
+    "We're the Millers": 2013,
+    'Jumanji': 1995,
+    'Bridesmaids': 2011,
+    'Barb and Star Go to Vista Del Mar': 2021,
+    'Masterminds': 2016,
+    'Top Gun': 1986,
+    'Princess Bride': 1987,
+    'Tommy Boy': 1995,
+    'Beverly Hills Cop': 1984,
+    'Cocktail': 1988,
+    'Eurovision': 2020,
+    'Days of Thunder': 1990,
+    'Dumb and Dumber': 1994,
+    'Pop Star': 2016,
+    'Hot Tub Time Machine': 2010,
+    'The 40-Year-Old Virgin': 2005,
+    'What About Bob?': 1991,
+    'Something About Mary': 1998,
+    'Airplane': 1980,
+    'Bad Moms': 2016,
+    'Soul Plane': 2004,
+    'Mike and Dave Need Wedding Dates': 2016,
+    'Blockers': 2018,
+    'Big': 1988,
+    'Office Space': 1999,
+    'Tropic Thunder': 2008,
+    "Ferris Bueller's Day Off": 1986,
+    'Superbad': 2007,
+    'Neighbors': 2014,
+    'The Hangover': 2009
+  };
+
+  // Some titles need an alternate search query to match TMDB's catalog
+  var TMDB_SEARCH_OVERRIDES = {
+    'Anchorman': 'Anchorman The Legend of Ron Burgundy',
+    'Breakfast Club': 'The Breakfast Club',
+    'Vacation': 'National Lampoons Vacation',
+    'Axel F': 'Beverly Hills Cop Axel F',
+    'Walk Hard': 'Walk Hard The Dewey Cox Story',
+    'Caddy Shack': 'Caddyshack',
+    'Book Smart': 'Booksmart',
+    'Wedding Singer': 'The Wedding Singer',
+    'Princess Bride': 'The Princess Bride',
+    'Eurovision': 'Eurovision Song Contest The Story of Fire Saga',
+    'Pop Star': 'Popstar Never Stop Never Stopping',
+    'Something About Mary': 'Theres Something About Mary',
+    'Airplane': 'Airplane!',
+    'Talladega Nights': 'Talladega Nights The Ballad of Ricky Bobby'
+  };
+
+  function getPosterCache() {
+    try {
+      return JSON.parse(localStorage.getItem(POSTER_CACHE_KEY) || '{}');
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function savePosterCache(cache) {
+    try {
+      localStorage.setItem(POSTER_CACHE_KEY, JSON.stringify(cache));
+    } catch (e) { /* ignore storage errors */ }
+  }
+
+  function fetchTMDBPoster(title, callback) {
+    var cache = getPosterCache();
+    var cacheKey = title.toLowerCase().trim();
+
+    // Return cached result if available
+    if (cache[cacheKey]) {
+      callback(cache[cacheKey]);
+      return;
+    }
+
+    var searchTitle = TMDB_SEARCH_OVERRIDES[title] || title;
+    var year = FILM_YEAR_MAP[title] || '';
+    var url = TMDB_SEARCH_URL + '?api_key=' + TMDB_API_KEY +
+              '&query=' + encodeURIComponent(searchTitle) +
+              (year ? '&year=' + year : '');
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState !== 4) return;
+      if (xhr.status === 200) {
+        try {
+          var data = JSON.parse(xhr.responseText);
+          if (data.results && data.results.length > 0 && data.results[0].poster_path) {
+            var posterUrl = TMDB_IMAGE_BASE + data.results[0].poster_path;
+            cache[cacheKey] = posterUrl;
+            savePosterCache(cache);
+            callback(posterUrl);
+          }
+        } catch (e) {
+          console.warn('TMDB parse error for "' + title + '":', e);
+        }
+      } else if (xhr.status === 429) {
+        // Rate limited - retry after a delay
+        setTimeout(function () { fetchTMDBPoster(title, callback); }, 2000);
+      }
+    };
+    xhr.send();
+  }
+
+  function initTMDBPosters() {
+    var filmCards = document.querySelectorAll('.archive-film');
+    if (!filmCards.length) return;
+
+    // Stagger API calls to respect TMDB rate limits (~40 requests/10 seconds)
+    var delay = 0;
+    var STAGGER_MS = 250; // 4 requests per second
+
+    filmCards.forEach(function (card) {
+      var titleEl = card.querySelector('.archive-film-title');
+      if (!titleEl) return;
+
+      var title = titleEl.textContent.trim();
+      var placeholder = card.querySelector('.archive-poster-placeholder');
+      if (!placeholder) return;
+
+      // Check if already loaded from cache (instant)
+      var cache = getPosterCache();
+      var cacheKey = title.toLowerCase().trim();
+      if (cache[cacheKey]) {
+        replacePlaceholder(placeholder, cache[cacheKey], title);
+        return;
+      }
+
+      // Stagger uncached requests
+      setTimeout(function () {
+        fetchTMDBPoster(title, function (posterUrl) {
+          replacePlaceholder(placeholder, posterUrl, title);
+        });
+      }, delay);
+      delay += STAGGER_MS;
+    });
+  }
+
+  function replacePlaceholder(placeholder, posterUrl, title) {
+    var img = document.createElement('img');
+    img.alt = title + ' movie poster';
+    img.loading = 'lazy';
+    img.onload = function () {
+      placeholder.style.display = 'none';
+    };
+    img.onerror = function () {
+      // If image fails to load, remove img and keep the SVG placeholder visible
+      if (img.parentNode) img.parentNode.removeChild(img);
+    };
+    placeholder.parentNode.insertBefore(img, placeholder);
+    img.src = posterUrl;
+  }
+
   // Initialize
   document.addEventListener('DOMContentLoaded', function () {
     initLoginGate();
@@ -604,5 +806,6 @@
     initArchiveFilters();
     initGallery();
     initQuoteWall();
+    initTMDBPosters();
   });
 })();
