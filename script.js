@@ -122,12 +122,17 @@
 
   // --- Rotating Quotes (Homepage) ---
   var QUOTES = [
-    { text: 'Who knew watching Jaws on the lake could be so terrifyingly perfect?', attr: 'Elk Rapids Film Festival, 2018' },
-    { text: 'This is what summer is all about.', attr: 'Elk Rapids Film Festival' },
-    { text: 'I can\'t believe they let us rent an entire theater for this.', attr: 'Elk Rapids Film Festival' },
-    { text: 'The yacht rock screening was peak cinema. Fight me.', attr: 'Elk Rapids Film Festival, 2022' },
-    { text: 'Sixteen years later and the wives still roll their eyes. But they never miss a screening.', attr: 'Elk Rapids Film Festival' },
-    { text: 'There\'s no better place to watch a movie than on a lake in Michigan.', attr: 'Elk Rapids Film Festival' }
+    { text: 'Even when I\'m far from the water, the lessons of Elk Lake continue to guide me, helping me navigate life. It is, and will always be, my (up) North Star.', attr: 'Katie' },
+    { text: 'You\'re gonna need a bigger boat.', attr: 'Jaws' },
+    { text: 'Did we just become best friends? / Yup!', attr: 'Step Brothers' },
+    { text: 'I feel the need\u2026 the need for speed!', attr: 'Top Gun' },
+    { text: 'The Dude abides.', attr: 'The Big Lebowski' },
+    { text: '60% of the time, it works every time.', attr: 'Anchorman' },
+    { text: 'If you ain\'t first, you\'re last.', attr: 'Talladega Nights' },
+    { text: 'Blue, you\'re my boy!', attr: 'Old School' },
+    { text: 'So you\'re telling me there\'s a chance!', attr: 'Dumb and Dumber' },
+    { text: 'Talk to me, Goose.', attr: 'Top Gun: Maverick' },
+    { text: 'You touched my heart.', attr: 'Barb and Star Go to Vista Del Mar' }
   ];
 
   function initRotatingQuotes() {
@@ -445,59 +450,9 @@
     if (winnersToggle) winnersToggle.addEventListener('change', applyFilters);
   }
 
-  // --- Quote Wall Filters ---
+  // --- Quote Wall ---
   function initQuoteWall() {
-    var yearFilter = document.getElementById('quotes-year-filter');
-    var personFilter = document.getElementById('quotes-person-filter');
-    var filmFilter = document.getElementById('quotes-film-filter');
-    var cards = document.querySelectorAll('.quote-card');
-    if (!yearFilter || !cards.length) return;
-
-    // Populate person and film filters from data
-    var people = new Set();
-    var films = new Set();
-    cards.forEach(function (card) {
-      var person = card.getAttribute('data-person');
-      var film = card.getAttribute('data-film');
-      if (person) people.add(person);
-      if (film) films.add(film);
-    });
-
-    people.forEach(function (p) {
-      var opt = document.createElement('option');
-      opt.value = p;
-      opt.textContent = p;
-      personFilter.appendChild(opt);
-    });
-
-    films.forEach(function (f) {
-      var opt = document.createElement('option');
-      opt.value = f;
-      opt.textContent = f;
-      filmFilter.appendChild(opt);
-    });
-
-    function applyFilters() {
-      var year = yearFilter.value;
-      var person = personFilter.value;
-      var film = filmFilter.value;
-
-      cards.forEach(function (card) {
-        var yearMatch = year === 'all' || card.getAttribute('data-year') === year;
-        var personMatch = person === 'all' || card.getAttribute('data-person') === person;
-        var filmMatch = film === 'all' || card.getAttribute('data-film') === film;
-
-        if (yearMatch && personMatch && filmMatch) {
-          card.classList.remove('hidden');
-        } else {
-          card.classList.add('hidden');
-        }
-      });
-    }
-
-    yearFilter.addEventListener('change', applyFilters);
-    personFilter.addEventListener('change', applyFilters);
-    filmFilter.addEventListener('change', applyFilters);
+    // Quote wall now uses category-based layout; no filters needed
   }
 
   // --- Gallery & Lightbox ---

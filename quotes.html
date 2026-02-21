@@ -59,170 +59,281 @@
     </div>
   </header>
 
-  <!-- Featured Quote -->
+  <!-- Featured Quote - Katie -->
   <section class="section quotes-featured">
     <div class="container">
       <div class="featured-quote-card">
         <div class="featured-quote-mark" aria-hidden="true">&ldquo;</div>
         <blockquote class="featured-quote-text">
-          <p>There's something about a Michigan summer &mdash; the light on the lake, the sound of the water, the long golden evenings &mdash; that makes everything you watch together feel like it matters more.</p>
+          <p>Even when I&rsquo;m far from the water, the lessons of Elk Lake continue to guide me, helping me navigate life. It is, and will always be, my (up) North Star.</p>
         </blockquote>
         <div class="featured-quote-meta">
-          <span class="featured-quote-person">The Founders</span>
-          <span class="featured-quote-film">Elk Rapids Film Festival</span>
+          <span class="featured-quote-person">&mdash; Katie</span>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Filters -->
-  <section class="quotes-filter-bar">
-    <div class="container">
-      <div class="quotes-filters">
-        <div class="quotes-filter-group">
-          <label for="quotes-year-filter" class="form-label">Year</label>
-          <select id="quotes-year-filter" class="form-select">
-            <option value="all">All Years</option>
-            <option value="2025">2025</option>
-            <option value="2024">2024</option>
-            <option value="2023">2023</option>
-            <option value="2022">2022</option>
-            <option value="2021">2021</option>
-            <option value="2020">2020</option>
-            <option value="2019">2019</option>
-            <option value="2018">2018</option>
-          </select>
-        </div>
-        <div class="quotes-filter-group">
-          <label for="quotes-person-filter" class="form-label">Person</label>
-          <select id="quotes-person-filter" class="form-select">
-            <option value="all">Everyone</option>
-          </select>
-        </div>
-        <div class="quotes-filter-group">
-          <label for="quotes-film-filter" class="form-label">Film</label>
-          <select id="quotes-film-filter" class="form-select">
-            <option value="all">All Films</option>
-          </select>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Quote Wall -->
+  <!-- Quote Categories -->
   <section class="section quotes-wall-section">
     <div class="container">
-      <div class="quotes-wall" id="quotes-wall">
 
-        <div class="quote-card quote-card--lake" data-year="2018" data-person="Festival" data-film="Jaws">
-          <div class="quote-card-mark">&ldquo;</div>
-          <p class="quote-card-text">Who knew watching Jaws on the lake could be so terrifyingly perfect?</p>
-          <div class="quote-card-meta">
-            <span class="quote-card-person">Festival Memory</span>
-            <span class="quote-card-detail">Jaws &middot; 2018</span>
+      <!-- The Foundations -->
+      <div class="quote-category">
+        <div class="quote-category-header">
+          <h2 class="quote-category-title">The Foundations</h2>
+          <div class="quote-category-line"></div>
+        </div>
+        <div class="quotes-wall">
+          <div class="quote-card quote-card--navy">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">The Hedge.</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Mike and Dave Need Wedding Dates</span>
+            </div>
+          </div>
+          <div class="quote-card quote-card--sunset">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">Just the tip.</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Wedding Crashers</span>
+            </div>
+          </div>
+          <div class="quote-card quote-card--gold">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">That escalated quickly.</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Anchorman: The Legend of Ron Burgundy</span>
+            </div>
           </div>
         </div>
-
-        <div class="quote-card quote-card--sunset" data-year="2022" data-person="Festival" data-film="Yacht Rock">
-          <div class="quote-card-mark">&ldquo;</div>
-          <p class="quote-card-text">The yacht rock screening was peak cinema. Fight me.</p>
-          <div class="quote-card-meta">
-            <span class="quote-card-person">Festival Memory</span>
-            <span class="quote-card-detail">Yacht Rock Summer &middot; 2022</span>
-          </div>
-        </div>
-
-        <div class="quote-card quote-card--navy" data-year="2023" data-person="Festival" data-film="General">
-          <div class="quote-card-mark">&ldquo;</div>
-          <p class="quote-card-text">I can't believe they let us rent an entire theater for this.</p>
-          <div class="quote-card-meta">
-            <span class="quote-card-person">Festival Memory</span>
-            <span class="quote-card-detail">Theater Takeover &middot; 2023</span>
-          </div>
-        </div>
-
-        <div class="quote-card quote-card--pine" data-year="2019" data-person="Festival" data-film="General">
-          <div class="quote-card-mark">&ldquo;</div>
-          <p class="quote-card-text">Ten years. Same friends. Same lake. How did we get so lucky?</p>
-          <div class="quote-card-meta">
-            <span class="quote-card-person">Festival Memory</span>
-            <span class="quote-card-detail">10th Anniversary &middot; 2019</span>
-          </div>
-        </div>
-
-        <div class="quote-card quote-card--gold" data-year="2020" data-person="Festival" data-film="General">
-          <div class="quote-card-mark">&ldquo;</div>
-          <p class="quote-card-text">Some traditions are too important to skip. Even this year.</p>
-          <div class="quote-card-meta">
-            <span class="quote-card-person">Festival Memory</span>
-            <span class="quote-card-detail">2020</span>
-          </div>
-        </div>
-
-        <div class="quote-card quote-card--sunset" data-year="2024" data-person="Festival" data-film="General">
-          <div class="quote-card-mark">&ldquo;</div>
-          <p class="quote-card-text">This is what summer is all about.</p>
-          <div class="quote-card-meta">
-            <span class="quote-card-person">Festival Memory</span>
-            <span class="quote-card-detail">2024</span>
-          </div>
-        </div>
-
-        <div class="quote-card quote-card--lake" data-year="2021" data-person="Festival" data-film="General">
-          <div class="quote-card-mark">&ldquo;</div>
-          <p class="quote-card-text">Being back together hits different after a year apart.</p>
-          <div class="quote-card-meta">
-            <span class="quote-card-person">Festival Memory</span>
-            <span class="quote-card-detail">The Reunion &middot; 2021</span>
-          </div>
-        </div>
-
-        <div class="quote-card quote-card--navy" data-year="2025" data-person="Festival" data-film="General">
-          <div class="quote-card-mark">&ldquo;</div>
-          <p class="quote-card-text">Sixteen years later and the wives still roll their eyes. But they never miss a screening.</p>
-          <div class="quote-card-meta">
-            <span class="quote-card-person">Festival Memory</span>
-            <span class="quote-card-detail">2025</span>
-          </div>
-        </div>
-
-        <div class="quote-card quote-card--pine" data-year="2018" data-person="Festival" data-film="Jaws">
-          <div class="quote-card-mark">&ldquo;</div>
-          <p class="quote-card-text">There's no better place to watch a movie than on a lake in Michigan.</p>
-          <div class="quote-card-meta">
-            <span class="quote-card-person">Festival Memory</span>
-            <span class="quote-card-detail">Jaws on the Lake &middot; 2018</span>
-          </div>
-        </div>
-
-        <div class="quote-card quote-card--gold" data-year="2022" data-person="Festival" data-film="Yacht Rock">
-          <div class="quote-card-mark">&ldquo;</div>
-          <p class="quote-card-text">Smooth sailing, smoother soundtracks.</p>
-          <div class="quote-card-meta">
-            <span class="quote-card-person">Festival Memory</span>
-            <span class="quote-card-detail">Yacht Rock Summer &middot; 2022</span>
-          </div>
-        </div>
-
-        <div class="quote-card quote-card--sunset" data-year="2010" data-person="The Wives" data-film="General">
-          <div class="quote-card-mark">&ldquo;</div>
-          <p class="quote-card-text">A whole week? Just watching movies? This is a terrible idea.</p>
-          <div class="quote-card-meta">
-            <span class="quote-card-person">The Wives</span>
-            <span class="quote-card-detail">The Inaugural Year &middot; 2010</span>
-          </div>
-        </div>
-
-        <div class="quote-card quote-card--lake" data-year="2024" data-person="Festival" data-film="General">
-          <div class="quote-card-mark">&ldquo;</div>
-          <p class="quote-card-text">The debates about which film should have won are half the fun.</p>
-          <div class="quote-card-meta">
-            <span class="quote-card-person">Festival Memory</span>
-            <span class="quote-card-detail">2024</span>
-          </div>
-        </div>
-
       </div>
+
+      <!-- The Academy of Wisdom -->
+      <div class="quote-category">
+        <div class="quote-category-header">
+          <h2 class="quote-category-title">The Academy of Wisdom</h2>
+          <div class="quote-category-line"></div>
+        </div>
+        <div class="quotes-wall">
+          <div class="quote-card quote-card--lake">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">The Dude abides.</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">The Big Lebowski</span>
+            </div>
+          </div>
+          <div class="quote-card quote-card--navy">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">You&rsquo;re gonna need a bigger boat.</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Jaws</span>
+            </div>
+          </div>
+          <div class="quote-card quote-card--sunset">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">Rubbing is racing.</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Days of Thunder</span>
+            </div>
+          </div>
+          <div class="quote-card quote-card--gold">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">So you&rsquo;re telling me there&rsquo;s a chance!</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Dumb and Dumber</span>
+            </div>
+          </div>
+          <div class="quote-card quote-card--pine">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">Coughlin&rsquo;s Law: Never show surprise, never lose your cool.</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Cocktail</span>
+            </div>
+          </div>
+          <div class="quote-card quote-card--lake">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">I saved Latin! What did you ever do?</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Rushmore</span>
+            </div>
+          </div>
+          <div class="quote-card quote-card--sunset">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">The wrong kid died.</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Walk Hard: The Dewey Cox Story</span>
+            </div>
+          </div>
+          <div class="quote-card quote-card--navy">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">Fat guy in a little coat!</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Tommy Boy</span>
+            </div>
+          </div>
+          <div class="quote-card quote-card--gold">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">I am McLovin.</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Superbad</span>
+            </div>
+          </div>
+          <div class="quote-card quote-card--pine">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">People don&rsquo;t forget!</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Superbad</span>
+            </div>
+          </div>
+          <div class="quote-card quote-card--lake">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">It&rsquo;s a hot tub time machine!</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Hot Tub Time Machine</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- The Top Gun HUD -->
+      <div class="quote-category">
+        <div class="quote-category-header">
+          <h2 class="quote-category-title">The Top Gun HUD</h2>
+          <div class="quote-category-line"></div>
+        </div>
+        <div class="quotes-wall">
+          <div class="quote-card quote-card--navy">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">You can be my wingman any time.</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Top Gun</span>
+            </div>
+          </div>
+          <div class="quote-card quote-card--sunset">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">I feel the need&hellip; the need for speed!</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Top Gun</span>
+            </div>
+          </div>
+          <div class="quote-card quote-card--lake">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">Your ego is writing checks your body can&rsquo;t cash.</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Top Gun</span>
+            </div>
+          </div>
+          <div class="quote-card quote-card--gold">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">Talk to me, Goose.</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Top Gun: Maverick</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- The Will Ferrell DNA -->
+      <div class="quote-category">
+        <div class="quote-category-header">
+          <h2 class="quote-category-title">The Will Ferrell DNA</h2>
+          <div class="quote-category-line"></div>
+        </div>
+        <div class="quotes-wall">
+          <div class="quote-card quote-card--sunset">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">I&rsquo;m kind of a big deal.</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Anchorman</span>
+            </div>
+          </div>
+          <div class="quote-card quote-card--navy">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">60% of the time, it works every time.</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Anchorman</span>
+            </div>
+          </div>
+          <div class="quote-card quote-card--gold">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">Did we just become best friends? / Yup!</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Step Brothers</span>
+            </div>
+          </div>
+          <div class="quote-card quote-card--pine">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">Boats &rsquo;n Hoes.</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Step Brothers</span>
+            </div>
+          </div>
+          <div class="quote-card quote-card--lake">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">If you ain&rsquo;t first, you&rsquo;re last.</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Talladega Nights</span>
+            </div>
+          </div>
+          <div class="quote-card quote-card--sunset">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">Shake and Bake!</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Talladega Nights</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- The Old School Pillars -->
+      <div class="quote-category">
+        <div class="quote-category-header">
+          <h2 class="quote-category-title">The Old School Pillars</h2>
+          <div class="quote-category-line"></div>
+        </div>
+        <div class="quotes-wall">
+          <div class="quote-card quote-card--lake">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">We&rsquo;re going streaking!</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Old School</span>
+            </div>
+          </div>
+          <div class="quote-card quote-card--navy">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">Blue, you&rsquo;re my boy!</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Old School</span>
+            </div>
+          </div>
+          <div class="quote-card quote-card--gold">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">Bed Bath &amp; Beyond&hellip; I don&rsquo;t know if we&rsquo;ll have enough time.</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Old School</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- The Winter Note -->
+      <div class="quote-category">
+        <div class="quote-category-header">
+          <h2 class="quote-category-title">The Winter Note</h2>
+          <div class="quote-category-line"></div>
+        </div>
+        <div class="quotes-wall">
+          <div class="quote-card quote-card--pine">
+            <div class="quote-card-mark">&ldquo;</div>
+            <p class="quote-card-text">You touched my heart.</p>
+            <div class="quote-card-meta">
+              <span class="quote-card-detail">Barb and Star Go to Vista Del Mar</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 
