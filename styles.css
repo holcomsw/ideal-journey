@@ -2100,6 +2100,10 @@ h1, h2, h3 {
 }
 
 /* --- Modal --- */
+.modal[hidden] {
+  display: none;
+}
+
 .modal {
   position: fixed;
   inset: 0;
