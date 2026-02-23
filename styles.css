@@ -1424,14 +1424,24 @@ h1, h2, h3 {
    Quote Wall Page
    ============================================ */
 
-/* --- Featured Quote --- */
+/* --- Featured Quote (Hero) --- */
 .quotes-featured {
   background: var(--color-navy);
-  padding: var(--space-xl) 0;
+  padding: var(--space-2xl) 0 var(--space-xl);
+  position: relative;
+  overflow: hidden;
+}
+
+.quotes-featured::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 120%, rgba(212, 149, 58, 0.12) 0%, transparent 60%);
+  pointer-events: none;
 }
 
 .featured-quote-card {
-  max-width: 800px;
+  max-width: 750px;
   margin: 0 auto;
   text-align: center;
   position: relative;
@@ -1439,36 +1449,47 @@ h1, h2, h3 {
 
 .featured-quote-mark {
   font-family: var(--font-display);
-  font-size: 8rem;
+  font-size: 10rem;
   color: var(--color-gold);
-  opacity: 0.2;
-  line-height: 0.3;
-  margin-bottom: var(--space-sm);
+  opacity: 0.15;
+  line-height: 0.2;
+  margin-bottom: var(--space-md);
+  user-select: none;
 }
 
 .featured-quote-text p {
   font-family: var(--font-display);
-  font-size: clamp(1.3rem, 3vw, 2rem);
+  font-size: clamp(1.4rem, 3.5vw, 2.2rem);
   font-style: italic;
   color: var(--color-cream);
-  line-height: 1.7;
+  line-height: 1.8;
+  letter-spacing: 0.01em;
 }
 
 .featured-quote-meta {
-  margin-top: var(--space-md);
+  margin-top: var(--space-lg);
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: var(--space-sm);
-  font-size: 0.9rem;
 }
 
 .featured-quote-person {
   color: var(--color-gold-light);
   font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .featured-quote-film {
   color: rgba(245, 239, 227, 0.5);
+}
+
+/* --- Quote Wall Section --- */
+.quotes-wall-section {
+  background: var(--color-cream);
+  padding-bottom: var(--space-xl);
 }
 
 /* --- Quote Categories --- */
@@ -1484,110 +1505,201 @@ h1, h2, h3 {
   display: flex;
   align-items: center;
   gap: var(--space-md);
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-lg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-cream);
+  padding: var(--space-sm) 0;
 }
 
 .quote-category-title {
   font-family: var(--font-display);
-  font-size: clamp(1.4rem, 3vw, 1.8rem);
+  font-size: clamp(1.3rem, 3vw, 1.7rem);
   color: var(--color-navy);
   white-space: nowrap;
+  letter-spacing: 0.01em;
 }
 
 .quote-category-line {
   flex: 1;
-  height: 2px;
-  background: linear-gradient(to right, var(--color-gold), transparent);
+  height: 1px;
   border-radius: 1px;
 }
 
-/* --- Quote Wall Grid --- */
-.quotes-wall-section {
-  background: var(--color-cream);
+/* Category-specific accent lines */
+.quote-category--foundations .quote-category-line {
+  background: linear-gradient(to right, var(--color-navy), transparent);
+}
+.quote-category--wisdom .quote-category-line {
+  background: linear-gradient(to right, var(--color-lake), transparent);
+}
+.quote-category--topgun .quote-category-line {
+  background: linear-gradient(to right, var(--color-gold), transparent);
+}
+.quote-category--ferrell .quote-category-line {
+  background: linear-gradient(to right, var(--color-sunset), transparent);
+}
+.quote-category--oldschool .quote-category-line {
+  background: linear-gradient(to right, var(--color-pine), transparent);
+}
+.quote-category--winter .quote-category-line {
+  background: linear-gradient(to right, var(--color-lake-light), transparent);
 }
 
-.quotes-wall {
+/* --- Masonry Quote Grid --- */
+.quotes-masonry {
   columns: 3;
-  column-gap: var(--space-sm);
+  column-gap: var(--space-md);
 }
 
+/* --- Quote Cards --- */
 .quote-card {
   break-inside: avoid;
-  margin-bottom: var(--space-sm);
-  border-radius: 14px;
-  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+  border-radius: 16px;
+  padding: var(--space-md) var(--space-md) var(--space-sm);
   position: relative;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .quote-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(27, 58, 75, 0.15);
+}
+
+.quote-card:hover .quote-card-reel {
+  opacity: 1;
 }
 
 .quote-card.hidden {
   display: none;
 }
 
-/* Color variants */
-.quote-card--lake {
-  background: var(--color-lake);
-  color: var(--color-white);
+/* Film reel icon on hover */
+.quote-card-reel {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  font-size: 0.9rem;
 }
 
-.quote-card--navy {
+/* Category color schemes */
+/* Foundations: Navy family */
+.quote-category--foundations .quote-card {
   background: var(--color-navy);
   color: var(--color-cream);
 }
+.quote-category--foundations .quote-card-chip {
+  background: rgba(245, 239, 227, 0.15);
+  color: var(--color-cream);
+}
 
-.quote-card--sunset {
-  background: var(--color-sunset);
+/* Wisdom: Lake family */
+.quote-category--wisdom .quote-card {
+  background: var(--color-lake);
+  color: var(--color-white);
+}
+.quote-category--wisdom .quote-card-chip {
+  background: rgba(255, 255, 255, 0.18);
   color: var(--color-white);
 }
 
-.quote-card--pine {
-  background: var(--color-pine);
-  color: var(--color-white);
-}
-
-.quote-card--gold {
+/* Top Gun: Gold family */
+.quote-category--topgun .quote-card {
   background: var(--color-gold);
   color: var(--color-navy-deep);
 }
+.quote-category--topgun .quote-card-chip {
+  background: rgba(18, 42, 56, 0.12);
+  color: var(--color-navy-deep);
+}
+.quote-category--topgun .quote-card-mark {
+  opacity: 0.3;
+}
 
+/* Ferrell: Sunset family */
+.quote-category--ferrell .quote-card {
+  background: var(--color-sunset);
+  color: var(--color-white);
+}
+.quote-category--ferrell .quote-card-chip {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--color-white);
+}
+
+/* Old School: Pine family */
+.quote-category--oldschool .quote-card {
+  background: var(--color-pine);
+  color: var(--color-white);
+}
+.quote-category--oldschool .quote-card-chip {
+  background: rgba(255, 255, 255, 0.18);
+  color: var(--color-white);
+}
+
+/* Winter: Frost/light theme */
+.quote-category--winter .quote-card {
+  background: var(--color-white);
+  color: var(--color-navy);
+  border: 1px solid var(--color-cream-dark);
+}
+.quote-category--winter .quote-card-chip {
+  background: var(--color-lake-light);
+  color: var(--color-white);
+}
+.quote-category--winter .quote-card-mark {
+  color: var(--color-lake-light);
+}
+
+/* --- Quote Card Inner Elements --- */
 .quote-card-mark {
   font-family: var(--font-display);
-  font-size: 3rem;
-  opacity: 0.25;
-  line-height: 0.5;
+  font-size: 3.5rem;
+  opacity: 0.2;
+  line-height: 0.4;
   margin-bottom: var(--space-xs);
+  user-select: none;
 }
 
 .quote-card-text {
   font-family: var(--font-display);
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-style: italic;
-  line-height: 1.6;
+  line-height: 1.7;
   margin-bottom: var(--space-sm);
+}
+
+/* Short quotes get bigger text */
+.quote-card--short .quote-card-text {
+  font-size: 1.4rem;
+  line-height: 1.5;
+}
+
+/* Film attribution chip */
+.quote-card-chip {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  line-height: 1.4;
 }
 
 .quote-card-meta {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-size: 0.8rem;
-  opacity: 0.7;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
 }
 
 .quote-card-person {
   font-weight: 600;
-}
-
-.quote-card--gold .quote-card-mark {
-  opacity: 0.35;
-}
-
-.quote-card--gold .quote-card-meta {
-  opacity: 0.8;
+  font-size: 0.8rem;
+  opacity: 0.7;
 }
 
 /* ============================================
@@ -2392,7 +2504,7 @@ h1, h2, h3 {
     columns: 2;
   }
 
-  .quotes-wall {
+  .quotes-masonry {
     columns: 2;
   }
 
@@ -2492,7 +2604,7 @@ h1, h2, h3 {
     columns: 1;
   }
 
-  .quotes-wall {
+  .quotes-masonry {
     columns: 1;
   }
 
