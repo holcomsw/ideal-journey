@@ -2079,6 +2079,20 @@ h1, h2, h3 {
   color: rgba(255,255,255,0.7);
 }
 
+.vote-hero-tagline {
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  font-style: italic;
+  color: var(--color-gold-light);
+  margin-bottom: var(--space-xs);
+}
+
+.vote-hero-dates {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 0.03em;
+}
+
 /* --- Nav dark variant --- */
 .nav--dark {
   position: relative;
@@ -2197,6 +2211,28 @@ h1, h2, h3 {
 
 .btn--vote:hover {
   background: var(--color-lake);
+  transform: translateY(-1px);
+}
+
+.nominee-actions {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn--trailer {
+  background: transparent;
+  color: var(--color-sunset);
+  border: 2px solid var(--color-sunset);
+  text-decoration: none;
+  text-align: center;
+  align-self: flex-start;
+}
+
+.btn--trailer:hover {
+  background: var(--color-sunset);
+  color: var(--color-white);
   transform: translateY(-1px);
 }
 

@@ -625,7 +625,12 @@
     "Ferris Bueller's Day Off": 1986,
     'Superbad': 2007,
     'Neighbors': 2014,
-    'The Hangover': 2009
+    'The Hangover': 2009,
+    'Mean Girls': 2004,
+    'The Devil Wears Prada': 2006,
+    'Bottoms': 2023,
+    'Clueless': 1995,
+    'Girls Trip': 2017
   };
 
   // Some titles need an alternate search query to match TMDB's catalog
@@ -749,6 +754,78 @@
     img.src = posterUrl;
   }
 
+  // --- Vote Page TMDB Poster Loader ---
+  // Loads posters for nominee cards on the Vote page using data-tmdb-title
+  // and data-tmdb-year attributes on .nominee-poster elements.
+  function initVotePosters() {
+    var posters = document.querySelectorAll('.nominee-poster[data-tmdb-title]');
+    if (!posters.length) return;
+
+    var delay = 0;
+    var STAGGER_MS = 250;
+
+    posters.forEach(function (posterEl) {
+      var title = posterEl.getAttribute('data-tmdb-title');
+      var year = posterEl.getAttribute('data-tmdb-year');
+      if (!title) return;
+
+      var placeholder = posterEl.querySelector('.nominee-poster-placeholder');
+      if (!placeholder) return;
+
+      // Check cache first
+      var cache = getPosterCache();
+      var cacheKey = title.toLowerCase().trim();
+      if (cache[cacheKey]) {
+        replaceNomineePlaceholder(posterEl, placeholder, cache[cacheKey], title);
+        return;
+      }
+
+      // Stagger API requests
+      setTimeout(function () {
+        var searchTitle = TMDB_SEARCH_OVERRIDES[title] || title;
+        var searchYear = FILM_YEAR_MAP[title] || year || '';
+        var url = TMDB_SEARCH_URL + '?api_key=' + TMDB_API_KEY +
+                  '&query=' + encodeURIComponent(searchTitle) +
+                  (searchYear ? '&year=' + searchYear : '');
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState !== 4) return;
+          if (xhr.status === 200) {
+            try {
+              var data = JSON.parse(xhr.responseText);
+              if (data.results && data.results.length > 0 && data.results[0].poster_path) {
+                var posterUrl = TMDB_IMAGE_BASE + data.results[0].poster_path;
+                cache[cacheKey] = posterUrl;
+                savePosterCache(cache);
+                replaceNomineePlaceholder(posterEl, placeholder, posterUrl, title);
+              }
+            } catch (e) {
+              console.warn('TMDB parse error for "' + title + '":', e);
+            }
+          }
+        };
+        xhr.send();
+      }, delay);
+      delay += STAGGER_MS;
+    });
+  }
+
+  function replaceNomineePlaceholder(posterEl, placeholder, posterUrl, title) {
+    var img = document.createElement('img');
+    img.alt = title + ' movie poster';
+    img.loading = 'lazy';
+    img.onload = function () {
+      placeholder.style.display = 'none';
+    };
+    img.onerror = function () {
+      if (img.parentNode) img.parentNode.removeChild(img);
+    };
+    posterEl.insertBefore(img, placeholder);
+    img.src = posterUrl;
+  }
+
   // Initialize
   document.addEventListener('DOMContentLoaded', function () {
     initLoginGate();
@@ -762,5 +839,6 @@
     initGallery();
     initQuoteWall();
     initTMDBPosters();
+    initVotePosters();
   });
 })();
