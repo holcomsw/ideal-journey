@@ -127,6 +127,10 @@
         <div class="admin-panel" id="panel-voting" hidden>
           <div class="admin-panel-header">
             <h2>Manage Voting</h2>
+            <div class="admin-header-actions">
+              <button class="btn btn--submit" style="width:auto;" id="export-votes-btn">Export CSV</button>
+              <button class="btn btn--outline" style="width:auto;" id="clear-votes-btn">Clear All Votes</button>
+            </div>
           </div>
 
           <!-- Voting Controls -->
@@ -151,9 +155,16 @@
             </div>
           </div>
 
-          <!-- Votes List -->
+          <!-- Vote Tally -->
           <div class="admin-card">
-            <h3>Submitted Votes (<span id="vote-count">0</span>)</h3>
+            <h3>Vote Tally</h3>
+            <p class="admin-tally-total">Total Votes: <strong id="vote-total-count">0</strong></p>
+            <div id="admin-vote-tally" class="admin-vote-tally"></div>
+          </div>
+
+          <!-- Individual Votes -->
+          <div class="admin-card">
+            <h3>Individual Votes (<span id="vote-count">0</span>)</h3>
             <div id="admin-votes-list" class="admin-list"></div>
           </div>
 

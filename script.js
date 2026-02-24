@@ -306,6 +306,19 @@
           timestamp: new Date().toISOString()
         });
 
+        // Send email notification to festival admin
+        var subject = encodeURIComponent('ERFF Film Suggestion: ' + title + (year ? ' (' + year + ')' : ''));
+        var body = encodeURIComponent(
+          'New film suggestion for the Elk Rapids Film Festival!\n\n' +
+          'Film: ' + title + (year ? ' (' + year + ')' : '') + '\n' +
+          'Why it fits the theme: ' + reason + '\n' +
+          'Suggested by: ' + name + '\n' +
+          'Date: ' + new Date().toLocaleString()
+        );
+        var mailLink = document.createElement('a');
+        mailLink.href = 'mailto:holcomsw@me.com?subject=' + subject + '&body=' + body;
+        mailLink.click();
+
         writeinForm.reset();
         var success = document.getElementById('writein-success');
         if (success) {
