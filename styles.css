@@ -918,9 +918,19 @@ h1, h2, h3 {
 }
 
 .founder-avatar {
-  color: var(--color-lake);
-  margin-bottom: var(--space-sm);
-  opacity: 0.5;
+  width: 160px;
+  height: 160px;
+  margin: 0 auto var(--space-sm);
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid var(--color-gold);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.founder-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .founder-card h3 {
