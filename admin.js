@@ -12,6 +12,15 @@
   var VOTES_KEY = 'erff_votes';
   var SUGGESTIONS_KEY = 'erff_suggestions';
 
+  // --- Supabase Client ---
+  var SUPABASE_URL = 'https://mafzshadraujlyndvfwv.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hZnpzaGFkcmF1amx5bmR2Znd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNjk2OTksImV4cCI6MjA4NzY0NTY5OX0.S0YIkmbnGxyAxG46ZO250jFsMph8rElB4mkfhF-uyYA';
+  var sb = null;
+
+  if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+
   // --- Auth ---
   function initAdminAuth() {
     var loginEl = document.getElementById('admin-login');
@@ -177,140 +186,228 @@
     renderFilmsList();
   };
 
-  // --- Voting ---
+  // --- Voting (Supabase-powered) ---
+
+  function fetchVotes(callback) {
+    if (sb) {
+      sb.from('votes').select('*').order('created_at', { ascending: true })
+        .then(function (result) {
+          if (result.error) {
+            console.warn('Supabase votes fetch error:', result.error.message);
+            callback(getLocalVotes());
+          } else {
+            callback((result.data || []).map(function (row) {
+              return {
+                id: row.id,
+                filmId: row.film_id,
+                filmName: row.film_name,
+                voterName: row.voter_name,
+                comment: row.comment || '',
+                timestamp: row.created_at
+              };
+            }));
+          }
+        });
+    } else {
+      callback(getLocalVotes());
+    }
+  }
+
+  function fetchSuggestions(callback) {
+    if (sb) {
+      sb.from('suggestions').select('*').order('created_at', { ascending: true })
+        .then(function (result) {
+          if (result.error) {
+            console.warn('Supabase suggestions fetch error:', result.error.message);
+            callback(getLocalSuggestions());
+          } else {
+            callback((result.data || []).map(function (row) {
+              return {
+                id: row.id,
+                title: row.title,
+                year: row.year || '',
+                reason: row.reason || '',
+                suggestedBy: row.suggested_by,
+                timestamp: row.created_at
+              };
+            }));
+          }
+        });
+    } else {
+      callback(getLocalSuggestions());
+    }
+  }
+
+  function getLocalVotes() {
+    try { return JSON.parse(localStorage.getItem(VOTES_KEY)) || []; }
+    catch (e) { return []; }
+  }
+
+  function getLocalSuggestions() {
+    try { return JSON.parse(localStorage.getItem(SUGGESTIONS_KEY)) || []; }
+    catch (e) { return []; }
+  }
+
   function initVotingPanel() {
     renderVotingDashboard();
 
     // Export CSV
     document.getElementById('export-votes-btn').addEventListener('click', function () {
-      var votes = getVotes();
-      if (!votes.length) { alert('No votes to export.'); return; }
-      var csv = 'Voter,Film,Comment,Date\n' + votes.map(function (v) {
-        return '"' + (v.voterName || '').replace(/"/g, '""') + '","' +
-          (v.filmName || '').replace(/"/g, '""') + '","' +
-          (v.comment || '').replace(/"/g, '""') + '","' +
-          (v.timestamp || '') + '"';
-      }).join('\n');
-      var blob = new Blob([csv], { type: 'text/csv' });
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = 'erff-votes-' + new Date().toISOString().slice(0, 10) + '.csv';
-      a.click();
-      URL.revokeObjectURL(url);
+      fetchVotes(function (votes) {
+        if (!votes.length) { alert('No votes to export.'); return; }
+        var csv = 'Voter,Film,Comment,Date\n' + votes.map(function (v) {
+          return '"' + (v.voterName || '').replace(/"/g, '""') + '","' +
+            (v.filmName || '').replace(/"/g, '""') + '","' +
+            (v.comment || '').replace(/"/g, '""') + '","' +
+            (v.timestamp || '') + '"';
+        }).join('\n');
+        var blob = new Blob([csv], { type: 'text/csv' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'erff-votes-' + new Date().toISOString().slice(0, 10) + '.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+      });
     });
 
     // Clear all votes
     document.getElementById('clear-votes-btn').addEventListener('click', function () {
       if (!confirm('Are you sure you want to clear ALL votes? This cannot be undone.')) return;
-      localStorage.removeItem(VOTES_KEY);
-      renderVotingDashboard();
+      if (sb) {
+        // Delete all rows from Supabase votes table
+        sb.from('votes').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+          .then(function (result) {
+            if (result.error) {
+              console.warn('Supabase delete error:', result.error.message);
+            }
+            localStorage.removeItem(VOTES_KEY);
+            renderVotingDashboard();
+          });
+      } else {
+        localStorage.removeItem(VOTES_KEY);
+        renderVotingDashboard();
+      }
     });
   }
 
   function renderVotingDashboard() {
-    var votes = getVotes();
-    var suggestions = getSuggestions();
+    fetchVotes(function (votes) {
+      fetchSuggestions(function (suggestions) {
+        document.getElementById('vote-count').textContent = votes.length;
+        document.getElementById('vote-total-count').textContent = votes.length;
+        document.getElementById('suggestion-count').textContent = suggestions.length;
 
-    document.getElementById('vote-count').textContent = votes.length;
-    document.getElementById('vote-total-count').textContent = votes.length;
-    document.getElementById('suggestion-count').textContent = suggestions.length;
+        // Build vote tally with bar chart
+        var tallyContainer = document.getElementById('admin-vote-tally');
+        if (!votes.length) {
+          tallyContainer.innerHTML = '<p class="admin-empty">No votes yet. The tally will appear here as votes come in.</p>';
+        } else {
+          var tally = {};
+          votes.forEach(function (v) {
+            var key = v.filmName || ('Film ' + v.filmId);
+            tally[key] = (tally[key] || 0) + 1;
+          });
+          var sorted = Object.keys(tally).sort(function (a, b) { return tally[b] - tally[a]; });
+          var maxVotes = tally[sorted[0]];
 
-    // Build vote tally with bar chart
-    var tallyContainer = document.getElementById('admin-vote-tally');
-    if (!votes.length) {
-      tallyContainer.innerHTML = '<p class="admin-empty">No votes yet. The tally will appear here as votes come in.</p>';
-    } else {
-      var tally = {};
-      votes.forEach(function (v) {
-        var key = v.filmName || ('Film ' + v.filmId);
-        tally[key] = (tally[key] || 0) + 1;
+          tallyContainer.innerHTML = sorted.map(function (name, i) {
+            var count = tally[name];
+            var pct = Math.round((count / maxVotes) * 100);
+            var isLeader = i === 0;
+            return '<div class="admin-tally-row">' +
+              '<div class="admin-tally-name">' + escapeHtml(name) +
+                (isLeader ? ' <span class="admin-badge admin-badge--gold">Leading</span>' : '') +
+              '</div>' +
+              '<div class="admin-tally-bar-wrap">' +
+                '<div class="admin-tally-bar" style="width:' + pct + '%;background:' +
+                  (isLeader ? 'var(--color-gold)' : 'var(--color-lake)') + '"></div>' +
+              '</div>' +
+              '<div class="admin-tally-count">' + count + ' vote' + (count !== 1 ? 's' : '') + '</div>' +
+            '</div>';
+          }).join('');
+        }
+
+        // Individual votes list
+        var votesContainer = document.getElementById('admin-votes-list');
+        if (!votes.length) {
+          votesContainer.innerHTML = '<p class="admin-empty">No votes yet.</p>';
+        } else {
+          votesContainer.innerHTML = votes.map(function (v) {
+            return '<div class="admin-list-item">' +
+              '<div class="admin-list-item-info">' +
+                '<strong>' + escapeHtml(v.voterName) + '</strong> voted for <strong>' + escapeHtml(v.filmName) + '</strong>' +
+                (v.comment ? '<br><small style="font-style:italic;">"' + escapeHtml(v.comment) + '"</small>' : '') +
+                '<br><small>' + new Date(v.timestamp).toLocaleString() + '</small>' +
+              '</div>' +
+              '<div class="admin-list-item-actions">' +
+                '<button class="admin-btn-sm admin-btn-sm--danger" onclick="window.deleteVote(\'' + v.id + '\')">Remove</button>' +
+              '</div>' +
+            '</div>';
+          }).join('');
+        }
+
+        // Suggestions list
+        var suggestionsContainer = document.getElementById('admin-suggestions-list');
+        if (!suggestions.length) {
+          suggestionsContainer.innerHTML = '<p class="admin-empty">No suggestions yet.</p>';
+        } else {
+          suggestionsContainer.innerHTML = suggestions.map(function (s) {
+            return '<div class="admin-list-item">' +
+              '<div class="admin-list-item-info">' +
+                '<strong>' + escapeHtml(s.title) + '</strong>' +
+                (s.year ? ' (' + escapeHtml(s.year) + ')' : '') +
+                '<br><small>' + escapeHtml(s.reason) + '</small>' +
+                '<br><small>By ' + escapeHtml(s.suggestedBy) + ' &middot; ' + new Date(s.timestamp).toLocaleString() + '</small>' +
+              '</div>' +
+              '<div class="admin-list-item-actions">' +
+                '<button class="admin-btn-sm admin-btn-sm--danger" onclick="window.deleteSuggestion(\'' + s.id + '\')">Remove</button>' +
+              '</div>' +
+            '</div>';
+          }).join('');
+        }
       });
-      var sorted = Object.keys(tally).sort(function (a, b) { return tally[b] - tally[a]; });
-      var maxVotes = tally[sorted[0]];
-
-      tallyContainer.innerHTML = sorted.map(function (name, i) {
-        var count = tally[name];
-        var pct = Math.round((count / maxVotes) * 100);
-        var isLeader = i === 0;
-        return '<div class="admin-tally-row">' +
-          '<div class="admin-tally-name">' + escapeHtml(name) +
-            (isLeader ? ' <span class="admin-badge admin-badge--gold">Leading</span>' : '') +
-          '</div>' +
-          '<div class="admin-tally-bar-wrap">' +
-            '<div class="admin-tally-bar" style="width:' + pct + '%;background:' +
-              (isLeader ? 'var(--color-gold)' : 'var(--color-lake)') + '"></div>' +
-          '</div>' +
-          '<div class="admin-tally-count">' + count + ' vote' + (count !== 1 ? 's' : '') + '</div>' +
-        '</div>';
-      }).join('');
-    }
-
-    // Individual votes list
-    var votesContainer = document.getElementById('admin-votes-list');
-    if (!votes.length) {
-      votesContainer.innerHTML = '<p class="admin-empty">No votes yet.</p>';
-    } else {
-      votesContainer.innerHTML = votes.map(function (v, i) {
-        return '<div class="admin-list-item">' +
-          '<div class="admin-list-item-info">' +
-            '<strong>' + escapeHtml(v.voterName) + '</strong> voted for <strong>' + escapeHtml(v.filmName) + '</strong>' +
-            (v.comment ? '<br><small style="font-style:italic;">"' + escapeHtml(v.comment) + '"</small>' : '') +
-            '<br><small>' + new Date(v.timestamp).toLocaleString() + '</small>' +
-          '</div>' +
-          '<div class="admin-list-item-actions">' +
-            '<button class="admin-btn-sm admin-btn-sm--danger" onclick="window.deleteVote(' + i + ')">Remove</button>' +
-          '</div>' +
-        '</div>';
-      }).join('');
-    }
-
-    // Suggestions list
-    var suggestionsContainer = document.getElementById('admin-suggestions-list');
-    if (!suggestions.length) {
-      suggestionsContainer.innerHTML = '<p class="admin-empty">No suggestions yet.</p>';
-    } else {
-      suggestionsContainer.innerHTML = suggestions.map(function (s, i) {
-        return '<div class="admin-list-item">' +
-          '<div class="admin-list-item-info">' +
-            '<strong>' + escapeHtml(s.title) + '</strong>' +
-            (s.year ? ' (' + escapeHtml(s.year) + ')' : '') +
-            '<br><small>' + escapeHtml(s.reason) + '</small>' +
-            '<br><small>By ' + escapeHtml(s.suggestedBy) + ' &middot; ' + new Date(s.timestamp).toLocaleString() + '</small>' +
-          '</div>' +
-          '<div class="admin-list-item-actions">' +
-            '<button class="admin-btn-sm admin-btn-sm--danger" onclick="window.deleteSuggestion(' + i + ')">Remove</button>' +
-          '</div>' +
-        '</div>';
-      }).join('');
-    }
+    });
   }
 
-  window.deleteVote = function (index) {
+  window.deleteVote = function (id) {
     if (!confirm('Remove this vote?')) return;
-    var votes = getVotes();
-    votes.splice(index, 1);
-    localStorage.setItem(VOTES_KEY, JSON.stringify(votes));
-    renderVotingDashboard();
+    if (sb) {
+      sb.from('votes').delete().eq('id', id)
+        .then(function (result) {
+          if (result.error) {
+            console.warn('Supabase delete vote error:', result.error.message);
+          }
+          renderVotingDashboard();
+        });
+    } else {
+      // Fallback: delete by index from localStorage
+      var votes = getLocalVotes();
+      var idx = votes.findIndex(function (v) { return v.id === id; });
+      if (idx !== -1) votes.splice(idx, 1);
+      localStorage.setItem(VOTES_KEY, JSON.stringify(votes));
+      renderVotingDashboard();
+    }
   };
 
-  window.deleteSuggestion = function (index) {
+  window.deleteSuggestion = function (id) {
     if (!confirm('Remove this suggestion?')) return;
-    var suggestions = getSuggestions();
-    suggestions.splice(index, 1);
-    localStorage.setItem(SUGGESTIONS_KEY, JSON.stringify(suggestions));
-    renderVotingDashboard();
+    if (sb) {
+      sb.from('suggestions').delete().eq('id', id)
+        .then(function (result) {
+          if (result.error) {
+            console.warn('Supabase delete suggestion error:', result.error.message);
+          }
+          renderVotingDashboard();
+        });
+    } else {
+      var suggestions = getLocalSuggestions();
+      var idx = suggestions.findIndex(function (s) { return s.id === id; });
+      if (idx !== -1) suggestions.splice(idx, 1);
+      localStorage.setItem(SUGGESTIONS_KEY, JSON.stringify(suggestions));
+      renderVotingDashboard();
+    }
   };
-
-  function getVotes() {
-    try { return JSON.parse(localStorage.getItem(VOTES_KEY)) || []; }
-    catch (e) { return []; }
-  }
-
-  function getSuggestions() {
-    try { return JSON.parse(localStorage.getItem(SUGGESTIONS_KEY)) || []; }
-    catch (e) { return []; }
-  }
 
   // --- Gallery ---
   function getGalleryItems() {

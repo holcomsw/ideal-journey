@@ -158,31 +158,129 @@
     }, 8000);
   }
 
+  // --- Supabase Client ---
+  var SUPABASE_URL = 'https://mafzshadraujlyndvfwv.supabase.co';
+  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hZnpzaGFkcmF1amx5bmR2Znd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNjk2OTksImV4cCI6MjA4NzY0NTY5OX0.S0YIkmbnGxyAxG46ZO250jFsMph8rElB4mkfhF-uyYA';
+  var supabase = null;
+
+  if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  }
+
   // --- Voting System ---
   var VOTES_KEY = 'erff_votes';
   var SUGGESTIONS_KEY = 'erff_suggestions';
   var VOTING_DEADLINE = new Date('2026-06-30T23:59:59');
 
-  function getVotes() {
+  // Fetch votes from Supabase, fall back to localStorage
+  function getVotes(callback) {
+    if (supabase) {
+      supabase.from('votes').select('*').order('created_at', { ascending: true })
+        .then(function (result) {
+          if (result.error) {
+            console.warn('Supabase fetch error:', result.error.message);
+            callback(getLocalVotes());
+          } else {
+            // Map Supabase rows to match existing format
+            var votes = (result.data || []).map(function (row) {
+              return {
+                id: row.id,
+                filmId: row.film_id,
+                filmName: row.film_name,
+                voterName: row.voter_name,
+                comment: row.comment || '',
+                timestamp: row.created_at
+              };
+            });
+            callback(votes);
+          }
+        });
+    } else {
+      callback(getLocalVotes());
+    }
+  }
+
+  function getLocalVotes() {
     try { return JSON.parse(localStorage.getItem(VOTES_KEY)) || []; }
     catch (e) { return []; }
   }
 
-  function saveVote(vote) {
-    var votes = getVotes();
-    votes.push(vote);
-    localStorage.setItem(VOTES_KEY, JSON.stringify(votes));
+  function saveVote(vote, callback) {
+    // Always save to localStorage as backup
+    var localVotes = getLocalVotes();
+    localVotes.push(vote);
+    localStorage.setItem(VOTES_KEY, JSON.stringify(localVotes));
+
+    if (supabase) {
+      supabase.from('votes').insert({
+        film_id: vote.filmId,
+        film_name: vote.filmName,
+        voter_name: vote.voterName,
+        comment: vote.comment || ''
+      }).then(function (result) {
+        if (result.error) {
+          console.warn('Supabase insert error:', result.error.message);
+        }
+        if (callback) callback();
+      });
+    } else {
+      if (callback) callback();
+    }
   }
 
-  function getSuggestions() {
+  // Fetch suggestions from Supabase, fall back to localStorage
+  function getSuggestions(callback) {
+    if (supabase) {
+      supabase.from('suggestions').select('*').order('created_at', { ascending: true })
+        .then(function (result) {
+          if (result.error) {
+            console.warn('Supabase fetch error:', result.error.message);
+            callback(getLocalSuggestions());
+          } else {
+            var suggestions = (result.data || []).map(function (row) {
+              return {
+                id: row.id,
+                title: row.title,
+                year: row.year || '',
+                reason: row.reason || '',
+                suggestedBy: row.suggested_by,
+                timestamp: row.created_at
+              };
+            });
+            callback(suggestions);
+          }
+        });
+    } else {
+      callback(getLocalSuggestions());
+    }
+  }
+
+  function getLocalSuggestions() {
     try { return JSON.parse(localStorage.getItem(SUGGESTIONS_KEY)) || []; }
     catch (e) { return []; }
   }
 
-  function saveSuggestion(suggestion) {
-    var suggestions = getSuggestions();
-    suggestions.push(suggestion);
-    localStorage.setItem(SUGGESTIONS_KEY, JSON.stringify(suggestions));
+  function saveSuggestion(suggestion, callback) {
+    // Always save to localStorage as backup
+    var localSuggestions = getLocalSuggestions();
+    localSuggestions.push(suggestion);
+    localStorage.setItem(SUGGESTIONS_KEY, JSON.stringify(localSuggestions));
+
+    if (supabase) {
+      supabase.from('suggestions').insert({
+        title: suggestion.title,
+        year: suggestion.year || '',
+        reason: suggestion.reason || '',
+        suggested_by: suggestion.suggestedBy
+      }).then(function (result) {
+        if (result.error) {
+          console.warn('Supabase insert error:', result.error.message);
+        }
+        if (callback) callback();
+      });
+    } else {
+      if (callback) callback();
+    }
   }
 
   function isVotingOpen() {
@@ -259,10 +357,10 @@
           voterName: name,
           comment: comment,
           timestamp: new Date().toISOString()
+        }, function () {
+          closeModal('vote-modal');
+          showConfirmation(name, filmName);
         });
-
-        closeModal('vote-modal');
-        showConfirmation(name, filmName);
       });
     }
 
@@ -304,6 +402,14 @@
           reason: reason,
           suggestedBy: name,
           timestamp: new Date().toISOString()
+        }, function () {
+          writeinForm.reset();
+          var success = document.getElementById('writein-success');
+          if (success) {
+            success.hidden = false;
+            setTimeout(function () { success.hidden = true; }, 3000);
+          }
+          renderSuggestions();
         });
 
         // Send email notification to festival admin
@@ -318,15 +424,6 @@
         var mailLink = document.createElement('a');
         mailLink.href = 'mailto:holcomsw@me.com?subject=' + subject + '&body=' + body;
         mailLink.click();
-
-        writeinForm.reset();
-        var success = document.getElementById('writein-success');
-        if (success) {
-          success.hidden = false;
-          setTimeout(function () { success.hidden = true; }, 3000);
-        }
-
-        renderSuggestions();
       });
     }
 
@@ -355,54 +452,60 @@
   }
 
   function renderSuggestions() {
-    var suggestions = getSuggestions();
     var container = document.getElementById('suggestions-container');
     var list = document.getElementById('suggestions-list');
-    if (!container || !list || !suggestions.length) return;
+    if (!container || !list) return;
 
-    list.hidden = false;
-    container.innerHTML = suggestions.map(function (s) {
-      return '<div class="suggestion-item">' +
-        '<h4>' + escapeHtml(s.title) + (s.year ? ' (' + escapeHtml(s.year) + ')' : '') + '</h4>' +
-        '<p>' + escapeHtml(s.reason) + '</p>' +
-        '<p class="suggestion-by">Suggested by ' + escapeHtml(s.suggestedBy) + '</p>' +
-        '</div>';
-    }).join('');
+    getSuggestions(function (suggestions) {
+      if (!suggestions.length) {
+        list.hidden = true;
+        return;
+      }
+      list.hidden = false;
+      container.innerHTML = suggestions.map(function (s) {
+        return '<div class="suggestion-item">' +
+          '<h4>' + escapeHtml(s.title) + (s.year ? ' (' + escapeHtml(s.year) + ')' : '') + '</h4>' +
+          '<p>' + escapeHtml(s.reason) + '</p>' +
+          '<p class="suggestion-by">Suggested by ' + escapeHtml(s.suggestedBy) + '</p>' +
+          '</div>';
+      }).join('');
+    });
   }
 
   function renderResults() {
-    var votes = getVotes();
     var container = document.getElementById('results-container');
     if (!container) return;
 
-    // Tally votes by film
-    var tally = {};
-    votes.forEach(function (v) {
-      var key = v.filmName || ('Film ' + v.filmId);
-      tally[key] = (tally[key] || 0) + 1;
+    getVotes(function (votes) {
+      // Tally votes by film
+      var tally = {};
+      votes.forEach(function (v) {
+        var key = v.filmName || ('Film ' + v.filmId);
+        tally[key] = (tally[key] || 0) + 1;
+      });
+
+      // Sort by vote count
+      var sorted = Object.keys(tally).sort(function (a, b) {
+        return tally[b] - tally[a];
+      });
+
+      if (!sorted.length) {
+        container.innerHTML = '<p style="text-align:center;color:var(--color-text-light);">No votes were cast this year.</p>';
+        return;
+      }
+
+      var maxVotes = tally[sorted[0]];
+
+      container.innerHTML = sorted.map(function (name) {
+        var count = tally[name];
+        var pct = Math.round((count / maxVotes) * 100);
+        return '<div class="result-bar">' +
+          '<span class="result-name">' + escapeHtml(name) + '</span>' +
+          '<div class="result-track"><div class="result-fill" style="width: ' + pct + '%"></div></div>' +
+          '<span class="result-count">' + count + '</span>' +
+          '</div>';
+      }).join('');
     });
-
-    // Sort by vote count
-    var sorted = Object.keys(tally).sort(function (a, b) {
-      return tally[b] - tally[a];
-    });
-
-    if (!sorted.length) {
-      container.innerHTML = '<p style="text-align:center;color:var(--color-text-light);">No votes were cast this year.</p>';
-      return;
-    }
-
-    var maxVotes = tally[sorted[0]];
-
-    container.innerHTML = sorted.map(function (name) {
-      var count = tally[name];
-      var pct = Math.round((count / maxVotes) * 100);
-      return '<div class="result-bar">' +
-        '<span class="result-name">' + escapeHtml(name) + '</span>' +
-        '<div class="result-track"><div class="result-fill" style="width: ' + pct + '%"></div></div>' +
-        '<span class="result-count">' + count + '</span>' +
-        '</div>';
-    }).join('');
   }
 
   // --- Archive Filters ---
