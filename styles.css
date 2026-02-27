@@ -758,6 +758,17 @@ h1, h2, h3 {
   color: var(--color-lake);
 }
 
+.origin-chapter {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  color: var(--color-navy);
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-sm);
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--color-gold);
+  display: inline-block;
+}
+
 /* --- How It Works --- */
 .about-process {
   background: var(--color-cream);
