@@ -1040,11 +1040,17 @@
   function onYTReady() {
     if (!document.getElementById('yt-player')) return;
 
+    // Load playlist directly via playerVars — this mirrors how YouTube's own
+    // embed code works and is the most reliable method.
+    // mute:1 is required for Chrome's autoplay policy to allow autoplay.
     ytPlayer = new YT.Player('yt-player', {
       height: '200',
       width: '200',
       playerVars: {
-        autoplay: 0,
+        listType: 'playlist',
+        list: PLAYLIST_ID,
+        autoplay: 1,
+        mute: 1,
         controls: 0,
         disablekb: 1,
         fs: 0,
@@ -1060,36 +1066,22 @@
   }
 
   var musicLoadTimer = null;
+  var musicLoadAttempt = 0;
 
   function onPlayerReady(event) {
     musicReady = true;
     var prefs = getMusicPrefs();
     var vol = prefs.volume !== undefined ? prefs.volume : 30;
-    var startIndex = prefs.trackIndex || 0;
 
     ytPlayer.setVolume(vol);
     document.getElementById('music-volume').value = vol;
 
-    // Mute before loading to avoid autoplay-with-sound blocks
-    if (prefs.muted || prefs.muted === undefined) {
-      ytPlayer.mute();
+    // Player starts muted via playerVars (mute:1). Apply user preference.
+    if (prefs.muted === false) {
+      ytPlayer.unMute();
+      updateMuteIcon(false);
+    } else {
       updateMuteIcon(true);
-    }
-
-    // Load the playlist using positional arguments (more reliable)
-    try {
-      ytPlayer.loadPlaylist(PLAYLIST_ID, startIndex, 0);
-    } catch (e) {
-      console.warn('loadPlaylist positional failed, trying object syntax');
-      try {
-        ytPlayer.loadPlaylist({
-          list: PLAYLIST_ID,
-          listType: 'playlist',
-          index: startIndex
-        });
-      } catch (e2) {
-        console.warn('loadPlaylist object also failed:', e2);
-      }
     }
 
     // Show the player UI
@@ -1097,36 +1089,54 @@
       musicPlayerEl.classList.add('music-player--visible');
     }, 500);
 
-    // Fallback: if still not loaded after 8 seconds, try cuePlaylist approach
-    musicLoadTimer = setTimeout(function () {
+    // The playlist should load automatically via playerVars.
+    // Set a fallback timer in case it doesn't start playing.
+    musicLoadTimer = setTimeout(tryNextLoadStrategy, 6000);
+  }
+
+  function tryNextLoadStrategy() {
+    musicLoadAttempt++;
+    var state;
+    try { state = ytPlayer.getPlayerState(); } catch (e) { state = -1; }
+
+    // Already playing or paused by user — nothing to do
+    if (state === YT.PlayerState.PLAYING || state === YT.PlayerState.PAUSED) return;
+
+    if (musicLoadAttempt === 1) {
+      // Fallback 1: loadPlaylist with object syntax (required for playlist IDs)
+      console.log('[Music] Fallback 1: loadPlaylist with object syntax');
+      updateStatus('Retrying...');
       try {
-        var state = ytPlayer.getPlayerState();
-        // -1 = unstarted, 3 = buffering — playlist never loaded
-        if (state === -1 || state === 3) {
-          console.warn('Playlist load timeout — trying cuePlaylist fallback');
-          ytPlayer.cuePlaylist({
-            list: PLAYLIST_ID,
-            listType: 'playlist',
-            index: 0
-          });
-          // After cuing, give it time then try to play
-          setTimeout(function () {
-            try {
-              var s = ytPlayer.getPlayerState();
-              if (s === 5) { // CUED
-                ytPlayer.playVideo();
-              } else if (s === -1) {
-                updateStatus('Unavailable');
-              }
-            } catch (e) {
-              updateStatus('Unavailable');
-            }
-          }, 3000);
-        }
+        ytPlayer.loadPlaylist({
+          list: PLAYLIST_ID,
+          listType: 'playlist',
+          index: 0,
+          startSeconds: 0
+        });
       } catch (e) {
-        updateStatus('Unavailable');
+        console.warn('[Music] loadPlaylist failed:', e);
       }
-    }, 8000);
+      musicLoadTimer = setTimeout(tryNextLoadStrategy, 6000);
+    } else if (musicLoadAttempt === 2) {
+      // Fallback 2: cuePlaylist then playVideo after a delay
+      console.log('[Music] Fallback 2: cuePlaylist + playVideo');
+      updateStatus('Retrying...');
+      try {
+        ytPlayer.cuePlaylist({
+          list: PLAYLIST_ID,
+          listType: 'playlist',
+          index: 0
+        });
+      } catch (e) {}
+      setTimeout(function () {
+        try { ytPlayer.playVideo(); } catch (e) {}
+      }, 2000);
+      musicLoadTimer = setTimeout(tryNextLoadStrategy, 8000);
+    } else {
+      // All strategies exhausted
+      console.warn('[Music] All loading strategies failed. The playlist may be private or not embeddable.');
+      updateStatus('Unavailable');
+    }
   }
 
   function onPlayerStateChange(event) {
@@ -1196,31 +1206,38 @@
 
   function onPlayerError(event) {
     var code = event && event.data;
-    console.warn('YouTube player error:', code);
-
-    // Clear fallback timer — error means the API is responding
-    if (musicLoadTimer) {
-      clearTimeout(musicLoadTimer);
-      musicLoadTimer = null;
-    }
+    console.warn('[Music] YouTube player error:', code);
 
     // Error codes: 2=bad param, 5=HTML5 error, 100=not found, 101/150=embed blocked
-    if (musicErrorRetries < 3) {
-      musicErrorRetries++;
-      // Try skipping to next track on embed-blocked errors
-      if (code === 101 || code === 150) {
+    if (code === 101 || code === 150) {
+      // Embed-blocked track — skip to next
+      if (musicErrorRetries < 5) {
+        musicErrorRetries++;
         try { ytPlayer.nextVideo(); } catch (e) {}
         return;
       }
-      // Retry loading the playlist after a delay
+    }
+
+    if (musicErrorRetries < 3) {
+      musicErrorRetries++;
+      // Retry loading the playlist with object syntax after a delay
       setTimeout(function () {
         try {
-          ytPlayer.loadPlaylist(PLAYLIST_ID, 0, 0);
+          ytPlayer.loadPlaylist({
+            list: PLAYLIST_ID,
+            listType: 'playlist',
+            index: 0,
+            startSeconds: 0
+          });
         } catch (e) {
           updateStatus('Unavailable');
         }
       }, 2000);
     } else {
+      if (musicLoadTimer) {
+        clearTimeout(musicLoadTimer);
+        musicLoadTimer = null;
+      }
       updateStatus('Unavailable');
     }
   }
