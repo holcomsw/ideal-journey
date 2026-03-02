@@ -48,6 +48,8 @@
     content.classList.remove('site-content--locked');
     if (animate) {
       gate.classList.add('login-gate--hidden');
+      // Start music on fresh login after the gate animation
+      setTimeout(initMusicPlayer, 1200);
     } else {
       gate.style.display = 'none';
     }
@@ -942,6 +944,269 @@
     img.src = posterUrl;
   }
 
+  // --- Music Player ---
+  // Background YouTube playlist player using the IFrame API.
+  // Auto-starts after login, remembers user preferences across pages.
+
+  var MUSIC_PREFS_KEY = 'erff_music_prefs';
+  var PLAYLIST_ID = 'PLhPh73eLkqat9kNMN7xL_LmHNm2Sv1Eok';
+  var ytPlayer = null;
+  var musicPlayerEl = null;
+  var musicReady = false;
+
+  function getMusicPrefs() {
+    try { return JSON.parse(localStorage.getItem(MUSIC_PREFS_KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+
+  function saveMusicPrefs(prefs) {
+    localStorage.setItem(MUSIC_PREFS_KEY, JSON.stringify(prefs));
+  }
+
+  function buildMusicPlayerUI() {
+    // Don't show on admin page
+    if (window.location.pathname.indexOf('admin') !== -1) return null;
+
+    var el = document.createElement('div');
+    el.className = 'music-player';
+    el.id = 'music-player';
+    el.innerHTML =
+      '<div class="music-player-info">' +
+        '<span class="music-player-label">Festival Soundtrack</span>' +
+        '<span class="music-player-status" id="music-status">Loading...</span>' +
+      '</div>' +
+      '<div class="music-player-controls">' +
+        '<button class="music-player-btn" id="music-play-btn" title="Play / Pause">' +
+          '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>' +
+        '</button>' +
+        '<button class="music-player-btn" id="music-mute-btn" title="Mute / Unmute">' +
+          '<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>' +
+        '</button>' +
+        '<input type="range" class="music-player-volume" id="music-volume" min="0" max="100" value="30" title="Volume">' +
+      '</div>';
+
+    document.body.appendChild(el);
+
+    // Hidden container for YouTube iframe
+    var ytContainer = document.createElement('div');
+    ytContainer.id = 'yt-player';
+    ytContainer.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;';
+    document.body.appendChild(ytContainer);
+
+    return el;
+  }
+
+  function initMusicPlayer() {
+    // Only run on public pages (not admin)
+    if (window.location.pathname.indexOf('admin') !== -1) return;
+
+    // Only show if user is authenticated
+    if (sessionStorage.getItem(SESSION_KEY) !== 'true') return;
+
+    musicPlayerEl = buildMusicPlayerUI();
+    if (!musicPlayerEl) return;
+
+    // Load YouTube IFrame API
+    if (!window.YT) {
+      var tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      document.head.appendChild(tag);
+    } else {
+      onYTReady();
+    }
+
+    // Wire up controls
+    document.getElementById('music-play-btn').addEventListener('click', togglePlay);
+    document.getElementById('music-mute-btn').addEventListener('click', toggleMute);
+    document.getElementById('music-volume').addEventListener('input', function () {
+      if (!ytPlayer || !musicReady) return;
+      var vol = parseInt(this.value, 10);
+      ytPlayer.setVolume(vol);
+      var prefs = getMusicPrefs();
+      prefs.volume = vol;
+      if (vol > 0) prefs.muted = false;
+      saveMusicPrefs(prefs);
+      updateMuteIcon(vol === 0);
+    });
+  }
+
+  // YouTube IFrame API calls this global function when ready
+  window.onYouTubeIframeAPIReady = function () {
+    onYTReady();
+  };
+
+  function onYTReady() {
+    if (!document.getElementById('yt-player')) return;
+    var prefs = getMusicPrefs();
+    var startIndex = prefs.trackIndex || 0;
+
+    ytPlayer = new YT.Player('yt-player', {
+      height: '1',
+      width: '1',
+      playerVars: {
+        listType: 'playlist',
+        list: PLAYLIST_ID,
+        autoplay: 1,
+        loop: 1,
+        controls: 0,
+        showinfo: 0,
+        modestbranding: 1,
+        index: startIndex
+      },
+      events: {
+        onReady: onPlayerReady,
+        onStateChange: onPlayerStateChange,
+        onError: onPlayerError
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    musicReady = true;
+    var prefs = getMusicPrefs();
+    var vol = prefs.volume !== undefined ? prefs.volume : 30;
+
+    ytPlayer.setVolume(vol);
+    document.getElementById('music-volume').value = vol;
+
+    // Handle user preferences: if explicitly paused, don't play
+    if (prefs.paused) {
+      ytPlayer.pauseVideo();
+      updatePlayIcon(false);
+      updateStatus('Paused');
+    } else {
+      // Try to play - browsers may block autoplay with sound
+      ytPlayer.playVideo();
+
+      // If user previously muted, or first visit, start muted to avoid autoplay block
+      if (prefs.muted || prefs.muted === undefined) {
+        ytPlayer.mute();
+        updateMuteIcon(true);
+      } else {
+        ytPlayer.unMute();
+        updateMuteIcon(false);
+      }
+    }
+
+    // Show the player
+    setTimeout(function () {
+      musicPlayerEl.classList.add('music-player--visible');
+    }, 500);
+  }
+
+  function onPlayerStateChange(event) {
+    if (!musicReady) return;
+    var state = event.data;
+
+    if (state === YT.PlayerState.PLAYING) {
+      updatePlayIcon(true);
+      // Save track index for cross-page resume
+      try {
+        var prefs = getMusicPrefs();
+        prefs.trackIndex = ytPlayer.getPlaylistIndex();
+        prefs.paused = false;
+        saveMusicPrefs(prefs);
+      } catch (e) {}
+      updateTrackInfo();
+    } else if (state === YT.PlayerState.PAUSED) {
+      updatePlayIcon(false);
+      updateStatus('Paused');
+    } else if (state === YT.PlayerState.BUFFERING) {
+      updateStatus('Loading...');
+    } else if (state === YT.PlayerState.ENDED) {
+      // Playlist loop should handle this, but just in case
+      ytPlayer.playVideo();
+    }
+  }
+
+  function onPlayerError() {
+    updateStatus('Unavailable');
+  }
+
+  function togglePlay() {
+    if (!ytPlayer || !musicReady) return;
+    var prefs = getMusicPrefs();
+    var state = ytPlayer.getPlayerState();
+
+    if (state === YT.PlayerState.PLAYING) {
+      ytPlayer.pauseVideo();
+      prefs.paused = true;
+    } else {
+      ytPlayer.playVideo();
+      prefs.paused = false;
+      // On first real play, unmute if it was auto-muted
+      if (prefs.muted === undefined) {
+        ytPlayer.unMute();
+        prefs.muted = false;
+        updateMuteIcon(false);
+      }
+    }
+    saveMusicPrefs(prefs);
+  }
+
+  function toggleMute() {
+    if (!ytPlayer || !musicReady) return;
+    var prefs = getMusicPrefs();
+
+    if (ytPlayer.isMuted()) {
+      ytPlayer.unMute();
+      prefs.muted = false;
+      updateMuteIcon(false);
+      // If paused, also start playing
+      if (ytPlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
+        ytPlayer.playVideo();
+        prefs.paused = false;
+      }
+    } else {
+      ytPlayer.mute();
+      prefs.muted = true;
+      updateMuteIcon(true);
+    }
+    saveMusicPrefs(prefs);
+  }
+
+  function updatePlayIcon(isPlaying) {
+    var btn = document.getElementById('music-play-btn');
+    if (!btn) return;
+    if (isPlaying) {
+      btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+      btn.title = 'Pause';
+    } else {
+      btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+      btn.title = 'Play';
+    }
+  }
+
+  function updateMuteIcon(isMuted) {
+    var btn = document.getElementById('music-mute-btn');
+    if (!btn) return;
+    if (isMuted) {
+      btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>';
+      btn.title = 'Unmute';
+    } else {
+      btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>';
+      btn.title = 'Mute';
+    }
+  }
+
+  function updateTrackInfo() {
+    if (!ytPlayer || !musicReady) return;
+    try {
+      var data = ytPlayer.getVideoData();
+      var title = data && data.title ? data.title : 'Playing';
+      // Trim long titles
+      if (title.length > 30) title = title.substring(0, 28) + '...';
+      updateStatus(title);
+    } catch (e) {
+      updateStatus('Playing');
+    }
+  }
+
+  function updateStatus(text) {
+    var el = document.getElementById('music-status');
+    if (el) el.textContent = text;
+  }
+
   // Initialize
   document.addEventListener('DOMContentLoaded', function () {
     initLoginGate();
@@ -956,5 +1221,8 @@
     initQuoteWall();
     initTMDBPosters();
     initVotePosters();
+
+    // Start music player after a short delay to let the page settle
+    setTimeout(initMusicPlayer, 800);
   });
 })();
