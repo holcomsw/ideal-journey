@@ -1037,21 +1037,19 @@
 
   function onYTReady() {
     if (!document.getElementById('yt-player')) return;
-    var prefs = getMusicPrefs();
-    var startIndex = prefs.trackIndex || 0;
 
+    // Create the player WITHOUT playlist in playerVars.
+    // We load the playlist via loadPlaylist() in onReady instead,
+    // which is more reliable for YouTube Music playlists.
     ytPlayer = new YT.Player('yt-player', {
       height: '1',
       width: '1',
       playerVars: {
-        listType: 'playlist',
-        list: PLAYLIST_ID,
-        autoplay: 1,
-        loop: 1,
+        autoplay: 0,
         controls: 0,
         showinfo: 0,
         modestbranding: 1,
-        index: startIndex
+        origin: window.location.origin
       },
       events: {
         onReady: onPlayerReady,
@@ -1065,30 +1063,26 @@
     musicReady = true;
     var prefs = getMusicPrefs();
     var vol = prefs.volume !== undefined ? prefs.volume : 30;
+    var startIndex = prefs.trackIndex || 0;
 
     ytPlayer.setVolume(vol);
     document.getElementById('music-volume').value = vol;
 
-    // Handle user preferences: if explicitly paused, don't play
-    if (prefs.paused) {
-      ytPlayer.pauseVideo();
-      updatePlayIcon(false);
-      updateStatus('Paused');
-    } else {
-      // Try to play - browsers may block autoplay with sound
-      ytPlayer.playVideo();
-
-      // If user previously muted, or first visit, start muted to avoid autoplay block
-      if (prefs.muted || prefs.muted === undefined) {
-        ytPlayer.mute();
-        updateMuteIcon(true);
-      } else {
-        ytPlayer.unMute();
-        updateMuteIcon(false);
-      }
+    // Mute before loading to avoid autoplay-with-sound blocks
+    if (prefs.muted || prefs.muted === undefined) {
+      ytPlayer.mute();
+      updateMuteIcon(true);
     }
 
-    // Show the player
+    // Load the playlist via API method (more reliable than playerVars)
+    ytPlayer.loadPlaylist({
+      list: PLAYLIST_ID,
+      listType: 'playlist',
+      index: startIndex,
+      suggestedQuality: 'small'
+    });
+
+    // Show the player UI
     setTimeout(function () {
       musicPlayerEl.classList.add('music-player--visible');
     }, 500);
@@ -1097,30 +1091,88 @@
   function onPlayerStateChange(event) {
     if (!musicReady) return;
     var state = event.data;
+    var prefs = getMusicPrefs();
 
     if (state === YT.PlayerState.PLAYING) {
       updatePlayIcon(true);
+
+      // Apply user prefs after playlist starts
+      if (prefs.paused) {
+        ytPlayer.pauseVideo();
+        return;
+      }
+
+      // Restore volume and mute state
+      var vol = prefs.volume !== undefined ? prefs.volume : 30;
+      ytPlayer.setVolume(vol);
+      if (prefs.muted === false) {
+        ytPlayer.unMute();
+        updateMuteIcon(false);
+      }
+
       // Save track index for cross-page resume
       try {
-        var prefs = getMusicPrefs();
         prefs.trackIndex = ytPlayer.getPlaylistIndex();
         prefs.paused = false;
         saveMusicPrefs(prefs);
       } catch (e) {}
       updateTrackInfo();
+
+      // Enable looping on the playlist
+      try { ytPlayer.setLoop(true); } catch (e) {}
     } else if (state === YT.PlayerState.PAUSED) {
       updatePlayIcon(false);
       updateStatus('Paused');
     } else if (state === YT.PlayerState.BUFFERING) {
       updateStatus('Loading...');
     } else if (state === YT.PlayerState.ENDED) {
-      // Playlist loop should handle this, but just in case
-      ytPlayer.playVideo();
+      // Restart playlist from beginning if loop didn't catch it
+      try {
+        ytPlayer.playVideoAt(0);
+      } catch (e) {
+        ytPlayer.playVideo();
+      }
+    } else if (state === YT.PlayerState.CUED) {
+      // Playlist is cued and ready - start playing
+      if (!prefs.paused) {
+        ytPlayer.playVideo();
+      } else {
+        updatePlayIcon(false);
+        updateStatus('Paused');
+      }
     }
   }
 
-  function onPlayerError() {
-    updateStatus('Unavailable');
+  var musicErrorRetries = 0;
+
+  function onPlayerError(event) {
+    var code = event && event.data;
+    console.warn('YouTube player error:', code);
+
+    // Error codes: 2=bad param, 5=HTML5 error, 100=not found, 101/150=embed blocked
+    if (musicErrorRetries < 2) {
+      musicErrorRetries++;
+      // Try skipping to next track on embed-blocked errors
+      if (code === 101 || code === 150) {
+        try { ytPlayer.nextVideo(); } catch (e) {}
+        return;
+      }
+      // Retry loading the playlist after a delay
+      setTimeout(function () {
+        try {
+          ytPlayer.loadPlaylist({
+            list: PLAYLIST_ID,
+            listType: 'playlist',
+            index: 0,
+            suggestedQuality: 'small'
+          });
+        } catch (e) {
+          updateStatus('Unavailable');
+        }
+      }, 2000);
+    } else {
+      updateStatus('Unavailable');
+    }
   }
 
   function togglePlay() {
