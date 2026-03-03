@@ -987,12 +987,24 @@
 
     document.body.appendChild(el);
 
-    // Hidden container for YouTube iframe
-    // Use off-screen positioning instead of opacity:0 / tiny size to avoid
-    // browser throttling of invisible media elements.
+    // Create the YouTube iframe directly with the videoseries embed URL.
+    // This is more reliable than letting YT.Player construct the iframe,
+    // especially for YouTube Music playlists that may need encrypted-media
+    // permissions. The allow attribute is critical for DRM-protected content.
     var ytContainer = document.createElement('div');
-    ytContainer.id = 'yt-player';
     ytContainer.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:200px;height:200px;overflow:hidden;pointer-events:none;';
+
+    var iframe = document.createElement('iframe');
+    iframe.id = 'yt-player';
+    iframe.width = '200';
+    iframe.height = '200';
+    iframe.frameBorder = '0';
+    iframe.setAttribute('allow', 'autoplay; encrypted-media');
+    iframe.src = 'https://www.youtube.com/embed/videoseries?list=' + PLAYLIST_ID +
+      '&enablejsapi=1&autoplay=1&mute=1&controls=0&disablekb=1&fs=0' +
+      '&modestbranding=1&rel=0&loop=1';
+
+    ytContainer.appendChild(iframe);
     document.body.appendChild(ytContainer);
 
     return el;
@@ -1040,23 +1052,10 @@
   function onYTReady() {
     if (!document.getElementById('yt-player')) return;
 
-    // Load playlist directly via playerVars — this mirrors how YouTube's own
-    // embed code works and is the most reliable method.
-    // mute:1 is required for Chrome's autoplay policy to allow autoplay.
+    // Attach the YT.Player API to the existing iframe (created in buildMusicPlayerUI)
+    // which already has the videoseries embed URL with all parameters baked in.
+    // This gives us API control while using YouTube's native playlist embed.
     ytPlayer = new YT.Player('yt-player', {
-      height: '200',
-      width: '200',
-      playerVars: {
-        listType: 'playlist',
-        list: PLAYLIST_ID,
-        autoplay: 1,
-        mute: 1,
-        controls: 0,
-        disablekb: 1,
-        fs: 0,
-        modestbranding: 1,
-        rel: 0
-      },
       events: {
         onReady: onPlayerReady,
         onStateChange: onPlayerStateChange,
