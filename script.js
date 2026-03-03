@@ -987,25 +987,13 @@
 
     document.body.appendChild(el);
 
-    // Create the YouTube iframe directly with the videoseries embed URL.
-    // This is more reliable than letting YT.Player construct the iframe,
-    // especially for YouTube Music playlists that may need encrypted-media
-    // permissions. The allow attribute is critical for DRM-protected content.
-    var ytContainer = document.createElement('div');
-    ytContainer.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:200px;height:200px;overflow:hidden;pointer-events:none;';
-
-    var iframe = document.createElement('iframe');
-    iframe.id = 'yt-player';
-    iframe.width = '200';
-    iframe.height = '200';
-    iframe.frameBorder = '0';
-    iframe.setAttribute('allow', 'autoplay; encrypted-media');
-    iframe.src = 'https://www.youtube.com/embed/videoseries?list=' + PLAYLIST_ID +
-      '&enablejsapi=1&autoplay=1&mute=1&controls=0&disablekb=1&fs=0' +
-      '&modestbranding=1&rel=0&loop=1';
-
-    ytContainer.appendChild(iframe);
-    document.body.appendChild(ytContainer);
+    // Hidden container — a plain <div> that YT.Player will replace with its
+    // own <iframe>. Using off-screen positioning (not display:none or 0-size)
+    // to avoid browser throttling of invisible media.
+    var ytDiv = document.createElement('div');
+    ytDiv.id = 'yt-player';
+    ytDiv.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:200px;height:200px;overflow:hidden;pointer-events:none;';
+    document.body.appendChild(ytDiv);
 
     return el;
   }
@@ -1051,31 +1039,59 @@
 
   function onYTReady() {
     if (!document.getElementById('yt-player')) return;
+    console.log('[Music] YT API ready — creating player with playlist:', PLAYLIST_ID);
 
-    // Attach the YT.Player API to the existing iframe (created in buildMusicPlayerUI)
-    // which already has the videoseries embed URL with all parameters baked in.
-    // This gives us API control while using YouTube's native playlist embed.
+    // Let YT.Player construct the iframe from the <div>.
+    // Include playlist in playerVars so the playlist loads immediately.
+    // mute + autoplay are required for Chrome autoplay policy.
     ytPlayer = new YT.Player('yt-player', {
+      height: '200',
+      width: '200',
+      playerVars: {
+        listType: 'playlist',
+        list: PLAYLIST_ID,
+        autoplay: 1,
+        mute: 1,
+        controls: 0,
+        disablekb: 1,
+        fs: 0,
+        modestbranding: 1,
+        rel: 0,
+        loop: 1,
+        origin: window.location.origin
+      },
       events: {
         onReady: onPlayerReady,
         onStateChange: onPlayerStateChange,
         onError: onPlayerError
       }
     });
+
+    // After creation, add allow="autoplay; encrypted-media" to the iframe.
+    // This is needed for DRM-protected YouTube Music content.
+    setTimeout(function () {
+      var iframe = document.getElementById('yt-player');
+      if (iframe && iframe.tagName === 'IFRAME') {
+        iframe.setAttribute('allow', 'autoplay; encrypted-media');
+        console.log('[Music] Set allow attribute on iframe');
+      }
+    }, 100);
   }
 
   var musicLoadTimer = null;
-  var musicLoadAttempt = 0;
+  var musicSkipAttempts = 0;
+  var MAX_SKIP_ATTEMPTS = 10;
 
   function onPlayerReady(event) {
     musicReady = true;
+    console.log('[Music] Player ready');
     var prefs = getMusicPrefs();
     var vol = prefs.volume !== undefined ? prefs.volume : 30;
 
     ytPlayer.setVolume(vol);
     document.getElementById('music-volume').value = vol;
 
-    // Player starts muted via playerVars (mute:1). Apply user preference.
+    // Player starts muted via playerVars. Apply user preference.
     if (prefs.muted === false) {
       ytPlayer.unMute();
       updateMuteIcon(false);
@@ -1088,60 +1104,75 @@
       musicPlayerEl.classList.add('music-player--visible');
     }, 500);
 
-    // The playlist should load automatically via playerVars.
-    // Set a fallback timer in case it doesn't start playing.
-    musicLoadTimer = setTimeout(tryNextLoadStrategy, 6000);
+    // The playlist should auto-load via playerVars. Set a generous timeout.
+    // If the player hasn't started within 15s, try skipping tracks (some
+    // YouTube Music tracks may have embed restrictions).
+    musicLoadTimer = setTimeout(function () {
+      checkAndRetry();
+    }, 15000);
   }
 
-  function tryNextLoadStrategy() {
-    musicLoadAttempt++;
+  function checkAndRetry() {
     var state;
     try { state = ytPlayer.getPlayerState(); } catch (e) { state = -1; }
+    console.log('[Music] Check state:', state, '| skip attempts:', musicSkipAttempts);
 
-    // Already playing or paused by user — nothing to do
+    // Already playing or paused — all good
     if (state === YT.PlayerState.PLAYING || state === YT.PlayerState.PAUSED) return;
 
-    if (musicLoadAttempt === 1) {
-      // Fallback 1: loadPlaylist with object syntax (required for playlist IDs)
-      console.log('[Music] Fallback 1: loadPlaylist with object syntax');
-      updateStatus('Retrying...');
-      try {
-        ytPlayer.loadPlaylist({
-          list: PLAYLIST_ID,
-          listType: 'playlist',
-          index: 0,
-          startSeconds: 0
-        });
-      } catch (e) {
-        console.warn('[Music] loadPlaylist failed:', e);
-      }
-      musicLoadTimer = setTimeout(tryNextLoadStrategy, 6000);
-    } else if (musicLoadAttempt === 2) {
-      // Fallback 2: cuePlaylist then playVideo after a delay
-      console.log('[Music] Fallback 2: cuePlaylist + playVideo');
-      updateStatus('Retrying...');
-      try {
-        ytPlayer.cuePlaylist({
-          list: PLAYLIST_ID,
-          listType: 'playlist',
-          index: 0
-        });
-      } catch (e) {}
-      setTimeout(function () {
-        try { ytPlayer.playVideo(); } catch (e) {}
-      }, 2000);
-      musicLoadTimer = setTimeout(tryNextLoadStrategy, 8000);
-    } else {
-      // All strategies exhausted
-      console.warn('[Music] All loading strategies failed. The playlist may be private or not embeddable.');
-      updateStatus('Unavailable');
+    // Still buffering — give it more time
+    if (state === YT.PlayerState.BUFFERING) {
+      musicLoadTimer = setTimeout(checkAndRetry, 5000);
+      return;
     }
+
+    // Try skipping to the next track (current one may be embed-blocked)
+    if (musicSkipAttempts < MAX_SKIP_ATTEMPTS) {
+      musicSkipAttempts++;
+      console.log('[Music] Skipping to next track (attempt ' + musicSkipAttempts + ')');
+      updateStatus('Retrying...');
+      try { ytPlayer.nextVideo(); } catch (e) {}
+      musicLoadTimer = setTimeout(checkAndRetry, 3000);
+    } else {
+      // All skip attempts exhausted — show visible fallback player
+      console.warn('[Music] Hidden player failed. Showing visible YouTube embed.');
+      showVisiblePlayer();
+    }
+  }
+
+  function showVisiblePlayer() {
+    // Replace the custom player UI with a small visible YouTube embed.
+    // This lets the user interact with it directly (click play, etc.)
+    // which bypasses any autoplay or embed restrictions.
+    var container = document.getElementById('yt-player');
+    if (container && container.parentNode) {
+      container.parentNode.removeChild(container);
+    }
+
+    var wrapper = document.createElement('div');
+    wrapper.style.cssText = 'position:fixed;bottom:70px;right:16px;z-index:9999;border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.4);';
+
+    var iframe = document.createElement('iframe');
+    iframe.width = '280';
+    iframe.height = '60';
+    iframe.frameBorder = '0';
+    iframe.setAttribute('allow', 'autoplay; encrypted-media');
+    iframe.src = 'https://www.youtube.com/embed/videoseries?list=' + PLAYLIST_ID +
+      '&autoplay=1&mute=1&loop=1';
+
+    wrapper.appendChild(iframe);
+    document.body.appendChild(wrapper);
+
+    // Update custom player status
+    updateStatus('Use player below');
+    updatePlayIcon(false);
   }
 
   function onPlayerStateChange(event) {
     if (!musicReady) return;
     var state = event.data;
     var prefs = getMusicPrefs();
+    console.log('[Music] State change:', state);
 
     // Clear the fallback timer once we get a meaningful state
     if (state === YT.PlayerState.PLAYING || state === YT.PlayerState.CUED) {
@@ -1149,6 +1180,7 @@
         clearTimeout(musicLoadTimer);
         musicLoadTimer = null;
       }
+      musicSkipAttempts = 0;
     }
 
     if (state === YT.PlayerState.PLAYING) {
@@ -1201,8 +1233,6 @@
     }
   }
 
-  var musicErrorRetries = 0;
-
   function onPlayerError(event) {
     var code = event && event.data;
     console.warn('[Music] YouTube player error:', code);
@@ -1210,34 +1240,30 @@
     // Error codes: 2=bad param, 5=HTML5 error, 100=not found, 101/150=embed blocked
     if (code === 101 || code === 150) {
       // Embed-blocked track — skip to next
-      if (musicErrorRetries < 5) {
-        musicErrorRetries++;
+      if (musicSkipAttempts < MAX_SKIP_ATTEMPTS) {
+        musicSkipAttempts++;
+        console.log('[Music] Track embed-blocked, skipping (attempt ' + musicSkipAttempts + ')');
         try { ytPlayer.nextVideo(); } catch (e) {}
         return;
       }
     }
 
-    if (musicErrorRetries < 3) {
-      musicErrorRetries++;
-      // Retry loading the playlist with object syntax after a delay
+    // For other errors, try reloading the playlist once
+    if (musicSkipAttempts < 2) {
+      musicSkipAttempts++;
       setTimeout(function () {
         try {
           ytPlayer.loadPlaylist({
             list: PLAYLIST_ID,
             listType: 'playlist',
-            index: 0,
+            index: musicSkipAttempts,
             startSeconds: 0
           });
-        } catch (e) {
-          updateStatus('Unavailable');
-        }
+        } catch (e) {}
       }, 2000);
     } else {
-      if (musicLoadTimer) {
-        clearTimeout(musicLoadTimer);
-        musicLoadTimer = null;
-      }
-      updateStatus('Unavailable');
+      // Show visible fallback player
+      showVisiblePlayer();
     }
   }
 
