@@ -2752,10 +2752,8 @@ h1, h2, h3 {
   background: var(--color-navy);
   border: 1px solid rgba(212, 175, 55, 0.3);
   border-radius: 14px;
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  padding: 10px;
+  width: 320px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.3);
   font-family: var(--font-body);
   transition: opacity 0.4s ease, transform 0.4s ease;
@@ -2768,6 +2766,17 @@ h1, h2, h3 {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
+}
+
+.music-player-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.music-player--collapsed .music-player-header {
+  margin-bottom: 0;
 }
 
 .music-player-label {
@@ -2795,10 +2804,15 @@ h1, h2, h3 {
   gap: 3px;
 }
 
-.music-player-controls {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+.music-player-embed {
+  overflow: hidden;
+  max-height: 160px;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.music-player--collapsed .music-player-embed {
+  max-height: 0;
+  opacity: 0;
 }
 
 .music-player-btn {
@@ -2811,9 +2825,13 @@ h1, h2, h3 {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s, color 0.2s;
+  transition: background 0.2s, color 0.2s, transform 0.3s;
   width: 30px;
   height: 30px;
+}
+
+.music-player--collapsed .music-player-btn svg {
+  transform: rotate(180deg);
 }
 
 .music-player-btn:hover {
@@ -2825,36 +2843,7 @@ h1, h2, h3 {
   width: 16px;
   height: 16px;
   fill: currentColor;
-}
-
-.music-player-volume {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 60px;
-  height: 4px;
-  background: rgba(255,255,255,0.2);
-  border-radius: 2px;
-  outline: none;
-  cursor: pointer;
-}
-
-.music-player-volume::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--color-gold);
-  cursor: pointer;
-}
-
-.music-player-volume::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--color-gold);
-  border: none;
-  cursor: pointer;
+  transition: transform 0.3s ease;
 }
 
 .music-player-prompt {
@@ -2875,11 +2864,7 @@ h1, h2, h3 {
     bottom: 12px;
     right: 12px;
     left: 12px;
+    width: auto;
     border-radius: 12px;
-    justify-content: space-between;
-  }
-
-  .music-player-volume {
-    width: 40px;
   }
 }

@@ -945,14 +945,12 @@
   }
 
   // --- Music Player ---
-  // Background YouTube playlist player using the IFrame API.
-  // Auto-starts after login, remembers user preferences across pages.
+  // Spotify playlist embed for background music.
+  // Shows after login with a compact Spotify player widget.
 
   var MUSIC_PREFS_KEY = 'erff_music_prefs';
-  var PLAYLIST_ID = 'PLhPh73eLkqat9kNMN7xL_LmHNm2Sv1Eok';
-  var ytPlayer = null;
+  var SPOTIFY_PLAYLIST_ID = '6flqUUqtTBeBoUSL193h7u';
   var musicPlayerEl = null;
-  var musicReady = false;
 
   function getMusicPrefs() {
     try { return JSON.parse(localStorage.getItem(MUSIC_PREFS_KEY)) || {}; }
@@ -967,33 +965,39 @@
     // Don't show on admin page
     if (window.location.pathname.indexOf('admin') !== -1) return null;
 
+    var prefs = getMusicPrefs();
+
     var el = document.createElement('div');
     el.className = 'music-player';
     el.id = 'music-player';
+
+    // Build the Spotify embed iframe
+    var embedSrc = 'https://open.spotify.com/embed/playlist/' + SPOTIFY_PLAYLIST_ID +
+      '?utm_source=generator&theme=0';
+
     el.innerHTML =
-      '<div class="music-player-info">' +
-        '<span class="music-player-label">Festival Soundtrack</span>' +
-        '<span class="music-player-status" id="music-status">Loading...</span>' +
+      '<div class="music-player-header">' +
+        '<div class="music-player-info">' +
+          '<span class="music-player-label">Festival Soundtrack</span>' +
+          '<span class="music-player-status" id="music-status">Spotify</span>' +
+        '</div>' +
+        '<button class="music-player-btn" id="music-collapse-btn" title="Collapse">' +
+          '<svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>' +
+        '</button>' +
       '</div>' +
-      '<div class="music-player-controls">' +
-        '<button class="music-player-btn" id="music-play-btn" title="Play / Pause">' +
-          '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>' +
-        '</button>' +
-        '<button class="music-player-btn" id="music-mute-btn" title="Mute / Unmute">' +
-          '<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>' +
-        '</button>' +
-        '<input type="range" class="music-player-volume" id="music-volume" min="0" max="100" value="30" title="Volume">' +
+      '<div class="music-player-embed" id="music-embed-container">' +
+        '<iframe id="spotify-player" src="' + embedSrc + '" ' +
+          'width="100%" height="152" frameBorder="0" ' +
+          'allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" ' +
+          'loading="lazy" style="border-radius:8px;"></iframe>' +
       '</div>';
 
     document.body.appendChild(el);
 
-    // Hidden container — a plain <div> that YT.Player will replace with its
-    // own <iframe>. Using off-screen positioning (not display:none or 0-size)
-    // to avoid browser throttling of invisible media.
-    var ytDiv = document.createElement('div');
-    ytDiv.id = 'yt-player';
-    ytDiv.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:200px;height:200px;overflow:hidden;pointer-events:none;';
-    document.body.appendChild(ytDiv);
+    // Restore collapsed state
+    if (prefs.collapsed) {
+      el.classList.add('music-player--collapsed');
+    }
 
     return el;
   }
@@ -1008,342 +1012,18 @@
     musicPlayerEl = buildMusicPlayerUI();
     if (!musicPlayerEl) return;
 
-    // Load YouTube IFrame API
-    if (!window.YT) {
-      var tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      document.head.appendChild(tag);
-    } else {
-      onYTReady();
-    }
-
-    // Wire up controls
-    document.getElementById('music-play-btn').addEventListener('click', togglePlay);
-    document.getElementById('music-mute-btn').addEventListener('click', toggleMute);
-    document.getElementById('music-volume').addEventListener('input', function () {
-      if (!ytPlayer || !musicReady) return;
-      var vol = parseInt(this.value, 10);
-      ytPlayer.setVolume(vol);
-      var prefs = getMusicPrefs();
-      prefs.volume = vol;
-      if (vol > 0) prefs.muted = false;
-      saveMusicPrefs(prefs);
-      updateMuteIcon(vol === 0);
-    });
-  }
-
-  // YouTube IFrame API calls this global function when ready
-  window.onYouTubeIframeAPIReady = function () {
-    onYTReady();
-  };
-
-  function onYTReady() {
-    if (!document.getElementById('yt-player')) return;
-    console.log('[Music] YT API ready — creating player with playlist:', PLAYLIST_ID);
-
-    // Let YT.Player construct the iframe from the <div>.
-    // Include playlist in playerVars so the playlist loads immediately.
-    // mute + autoplay are required for Chrome autoplay policy.
-    ytPlayer = new YT.Player('yt-player', {
-      height: '200',
-      width: '200',
-      playerVars: {
-        listType: 'playlist',
-        list: PLAYLIST_ID,
-        autoplay: 1,
-        mute: 1,
-        controls: 0,
-        disablekb: 1,
-        fs: 0,
-        modestbranding: 1,
-        rel: 0,
-        loop: 1,
-        origin: window.location.origin
-      },
-      events: {
-        onReady: onPlayerReady,
-        onStateChange: onPlayerStateChange,
-        onError: onPlayerError
-      }
-    });
-
-    // After creation, add allow="autoplay; encrypted-media" to the iframe.
-    // This is needed for DRM-protected YouTube Music content.
-    setTimeout(function () {
-      var iframe = document.getElementById('yt-player');
-      if (iframe && iframe.tagName === 'IFRAME') {
-        iframe.setAttribute('allow', 'autoplay; encrypted-media');
-        console.log('[Music] Set allow attribute on iframe');
-      }
-    }, 100);
-  }
-
-  var musicLoadTimer = null;
-  var musicSkipAttempts = 0;
-  var MAX_SKIP_ATTEMPTS = 10;
-
-  function onPlayerReady(event) {
-    musicReady = true;
-    console.log('[Music] Player ready');
-    var prefs = getMusicPrefs();
-    var vol = prefs.volume !== undefined ? prefs.volume : 30;
-
-    ytPlayer.setVolume(vol);
-    document.getElementById('music-volume').value = vol;
-
-    // Player starts muted via playerVars. Apply user preference.
-    if (prefs.muted === false) {
-      ytPlayer.unMute();
-      updateMuteIcon(false);
-    } else {
-      updateMuteIcon(true);
-    }
-
-    // Show the player UI
+    // Show the player UI after a short delay
     setTimeout(function () {
       musicPlayerEl.classList.add('music-player--visible');
-    }, 500);
+    }, 800);
 
-    // The playlist should auto-load via playerVars. Set a generous timeout.
-    // If the player hasn't started within 15s, try skipping tracks (some
-    // YouTube Music tracks may have embed restrictions).
-    musicLoadTimer = setTimeout(function () {
-      checkAndRetry();
-    }, 15000);
-  }
-
-  function checkAndRetry() {
-    var state;
-    try { state = ytPlayer.getPlayerState(); } catch (e) { state = -1; }
-    console.log('[Music] Check state:', state, '| skip attempts:', musicSkipAttempts);
-
-    // Already playing or paused — all good
-    if (state === YT.PlayerState.PLAYING || state === YT.PlayerState.PAUSED) return;
-
-    // Still buffering — give it more time
-    if (state === YT.PlayerState.BUFFERING) {
-      musicLoadTimer = setTimeout(checkAndRetry, 5000);
-      return;
-    }
-
-    // Try skipping to the next track (current one may be embed-blocked)
-    if (musicSkipAttempts < MAX_SKIP_ATTEMPTS) {
-      musicSkipAttempts++;
-      console.log('[Music] Skipping to next track (attempt ' + musicSkipAttempts + ')');
-      updateStatus('Retrying...');
-      try { ytPlayer.nextVideo(); } catch (e) {}
-      musicLoadTimer = setTimeout(checkAndRetry, 3000);
-    } else {
-      // All skip attempts exhausted — show visible fallback player
-      console.warn('[Music] Hidden player failed. Showing visible YouTube embed.');
-      showVisiblePlayer();
-    }
-  }
-
-  function showVisiblePlayer() {
-    // Replace the custom player UI with a small visible YouTube embed.
-    // This lets the user interact with it directly (click play, etc.)
-    // which bypasses any autoplay or embed restrictions.
-    var container = document.getElementById('yt-player');
-    if (container && container.parentNode) {
-      container.parentNode.removeChild(container);
-    }
-
-    var wrapper = document.createElement('div');
-    wrapper.style.cssText = 'position:fixed;bottom:70px;right:16px;z-index:9999;border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.4);';
-
-    var iframe = document.createElement('iframe');
-    iframe.width = '280';
-    iframe.height = '60';
-    iframe.frameBorder = '0';
-    iframe.setAttribute('allow', 'autoplay; encrypted-media');
-    iframe.src = 'https://www.youtube.com/embed/videoseries?list=' + PLAYLIST_ID +
-      '&autoplay=1&mute=1&loop=1';
-
-    wrapper.appendChild(iframe);
-    document.body.appendChild(wrapper);
-
-    // Update custom player status
-    updateStatus('Use player below');
-    updatePlayIcon(false);
-  }
-
-  function onPlayerStateChange(event) {
-    if (!musicReady) return;
-    var state = event.data;
-    var prefs = getMusicPrefs();
-    console.log('[Music] State change:', state);
-
-    // Clear the fallback timer once we get a meaningful state
-    if (state === YT.PlayerState.PLAYING || state === YT.PlayerState.CUED) {
-      if (musicLoadTimer) {
-        clearTimeout(musicLoadTimer);
-        musicLoadTimer = null;
-      }
-      musicSkipAttempts = 0;
-    }
-
-    if (state === YT.PlayerState.PLAYING) {
-      updatePlayIcon(true);
-
-      // Apply user prefs after playlist starts
-      if (prefs.paused) {
-        ytPlayer.pauseVideo();
-        return;
-      }
-
-      // Restore volume and mute state
-      var vol = prefs.volume !== undefined ? prefs.volume : 30;
-      ytPlayer.setVolume(vol);
-      if (prefs.muted === false) {
-        ytPlayer.unMute();
-        updateMuteIcon(false);
-      }
-
-      // Save track index for cross-page resume
-      try {
-        prefs.trackIndex = ytPlayer.getPlaylistIndex();
-        prefs.paused = false;
-        saveMusicPrefs(prefs);
-      } catch (e) {}
-      updateTrackInfo();
-
-      // Enable looping on the playlist
-      try { ytPlayer.setLoop(true); } catch (e) {}
-    } else if (state === YT.PlayerState.PAUSED) {
-      updatePlayIcon(false);
-      updateStatus('Paused');
-    } else if (state === YT.PlayerState.BUFFERING) {
-      updateStatus('Loading...');
-    } else if (state === YT.PlayerState.ENDED) {
-      // Restart playlist from beginning if loop didn't catch it
-      try {
-        ytPlayer.playVideoAt(0);
-      } catch (e) {
-        ytPlayer.playVideo();
-      }
-    } else if (state === YT.PlayerState.CUED) {
-      // Playlist is cued and ready - start playing
-      if (!prefs.paused) {
-        try { ytPlayer.playVideo(); } catch (e) {}
-      } else {
-        updatePlayIcon(false);
-        updateStatus('Paused');
-      }
-    }
-  }
-
-  function onPlayerError(event) {
-    var code = event && event.data;
-    console.warn('[Music] YouTube player error:', code);
-
-    // Error codes: 2=bad param, 5=HTML5 error, 100=not found, 101/150=embed blocked
-    if (code === 101 || code === 150) {
-      // Embed-blocked track — skip to next
-      if (musicSkipAttempts < MAX_SKIP_ATTEMPTS) {
-        musicSkipAttempts++;
-        console.log('[Music] Track embed-blocked, skipping (attempt ' + musicSkipAttempts + ')');
-        try { ytPlayer.nextVideo(); } catch (e) {}
-        return;
-      }
-    }
-
-    // For other errors, try reloading the playlist once
-    if (musicSkipAttempts < 2) {
-      musicSkipAttempts++;
-      setTimeout(function () {
-        try {
-          ytPlayer.loadPlaylist({
-            list: PLAYLIST_ID,
-            listType: 'playlist',
-            index: musicSkipAttempts,
-            startSeconds: 0
-          });
-        } catch (e) {}
-      }, 2000);
-    } else {
-      // Show visible fallback player
-      showVisiblePlayer();
-    }
-  }
-
-  function togglePlay() {
-    if (!ytPlayer || !musicReady) return;
-    var prefs = getMusicPrefs();
-    var state = ytPlayer.getPlayerState();
-
-    if (state === YT.PlayerState.PLAYING) {
-      ytPlayer.pauseVideo();
-      prefs.paused = true;
-    } else {
-      ytPlayer.playVideo();
-      prefs.paused = false;
-      // On first real play, unmute if it was auto-muted
-      if (prefs.muted === undefined) {
-        ytPlayer.unMute();
-        prefs.muted = false;
-        updateMuteIcon(false);
-      }
-    }
-    saveMusicPrefs(prefs);
-  }
-
-  function toggleMute() {
-    if (!ytPlayer || !musicReady) return;
-    var prefs = getMusicPrefs();
-
-    if (ytPlayer.isMuted()) {
-      ytPlayer.unMute();
-      prefs.muted = false;
-      updateMuteIcon(false);
-      // If paused, also start playing
-      if (ytPlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
-        ytPlayer.playVideo();
-        prefs.paused = false;
-      }
-    } else {
-      ytPlayer.mute();
-      prefs.muted = true;
-      updateMuteIcon(true);
-    }
-    saveMusicPrefs(prefs);
-  }
-
-  function updatePlayIcon(isPlaying) {
-    var btn = document.getElementById('music-play-btn');
-    if (!btn) return;
-    if (isPlaying) {
-      btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
-      btn.title = 'Pause';
-    } else {
-      btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
-      btn.title = 'Play';
-    }
-  }
-
-  function updateMuteIcon(isMuted) {
-    var btn = document.getElementById('music-mute-btn');
-    if (!btn) return;
-    if (isMuted) {
-      btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>';
-      btn.title = 'Unmute';
-    } else {
-      btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>';
-      btn.title = 'Mute';
-    }
-  }
-
-  function updateTrackInfo() {
-    if (!ytPlayer || !musicReady) return;
-    try {
-      var data = ytPlayer.getVideoData();
-      var title = data && data.title ? data.title : 'Playing';
-      // Trim long titles
-      if (title.length > 30) title = title.substring(0, 28) + '...';
-      updateStatus(title);
-    } catch (e) {
-      updateStatus('Playing');
-    }
+    // Wire up collapse toggle
+    document.getElementById('music-collapse-btn').addEventListener('click', function () {
+      var prefs = getMusicPrefs();
+      musicPlayerEl.classList.toggle('music-player--collapsed');
+      prefs.collapsed = musicPlayerEl.classList.contains('music-player--collapsed');
+      saveMusicPrefs(prefs);
+    });
   }
 
   function updateStatus(text) {
