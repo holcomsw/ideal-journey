@@ -625,8 +625,14 @@
 
     function updateLightboxContent() {
       var item = visibleItems[currentIndex];
+      var img = item.querySelector('img');
       var caption = item.querySelector('.masonry-caption span');
+      var lightboxImg = document.getElementById('lightbox-img');
       var captionEl = document.getElementById('lightbox-caption');
+      if (lightboxImg && img) {
+        lightboxImg.src = img.src;
+        lightboxImg.alt = img.alt || '';
+      }
       if (captionEl) captionEl.textContent = caption ? caption.textContent : '';
     }
 
