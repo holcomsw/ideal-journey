@@ -945,11 +945,11 @@
   }
 
   // --- Music Player ---
-  // Spotify playlist embed for background music.
-  // Shows after login with a compact Spotify player widget.
+  // YouTube playlist embed for background music.
+  // Shows after login with a compact YouTube player widget.
 
   var MUSIC_PREFS_KEY = 'erff_music_prefs';
-  var SPOTIFY_PLAYLIST_ID = '6flqUUqtTBeBoUSL193h7u';
+  var YOUTUBE_PLAYLIST_ID = 'PLhPh73eLkqauWtzllAGmkRreWZSC-m9OM';
   var musicPlayerEl = null;
 
   function getMusicPrefs() {
@@ -971,22 +971,21 @@
     el.className = 'music-player';
     el.id = 'music-player';
 
-    // Build the Spotify embed iframe
-    var embedSrc = 'https://open.spotify.com/embed/playlist/' + SPOTIFY_PLAYLIST_ID +
-      '?utm_source=generator&theme=0';
+    // Build the YouTube embed iframe
+    var embedSrc = 'https://www.youtube.com/embed/videoseries?list=' + YOUTUBE_PLAYLIST_ID;
 
     el.innerHTML =
       '<div class="music-player-header">' +
         '<div class="music-player-info">' +
           '<span class="music-player-label">Festival Soundtrack</span>' +
-          '<span class="music-player-status" id="music-status">Spotify</span>' +
+          '<span class="music-player-status" id="music-status">YouTube</span>' +
         '</div>' +
         '<button class="music-player-btn" id="music-collapse-btn" title="Collapse">' +
           '<svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>' +
         '</button>' +
       '</div>' +
       '<div class="music-player-embed" id="music-embed-container">' +
-        '<iframe id="spotify-player" src="' + embedSrc + '" ' +
+        '<iframe id="youtube-player" src="' + embedSrc + '" ' +
           'width="100%" height="152" frameBorder="0" ' +
           'allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" ' +
           'loading="lazy" style="border-radius:8px;"></iframe>' +
