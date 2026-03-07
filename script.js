@@ -605,8 +605,13 @@
 
     function getVisibleItems() {
       return Array.prototype.filter.call(items, function (item) {
-        return !item.classList.contains('hidden') && item.getAttribute('data-type') === 'photo';
+        return !item.classList.contains('hidden');
       });
+    }
+
+    function pauseLightboxVideo() {
+      var vid = document.getElementById('lightbox-video');
+      if (vid) { vid.pause(); vid.removeAttribute('src'); vid.load(); }
     }
 
     function openLightbox(index) {
@@ -619,20 +624,40 @@
     }
 
     function closeLightbox() {
+      pauseLightboxVideo();
       lightbox.hidden = true;
       document.body.style.overflow = '';
     }
 
     function updateLightboxContent() {
       var item = visibleItems[currentIndex];
-      var img = item.querySelector('img');
+      var isVideo = item.getAttribute('data-type') === 'video';
       var caption = item.querySelector('.masonry-caption span');
       var lightboxImg = document.getElementById('lightbox-img');
+      var lightboxVid = document.getElementById('lightbox-video');
       var captionEl = document.getElementById('lightbox-caption');
-      if (lightboxImg && img) {
-        lightboxImg.src = img.src;
-        lightboxImg.alt = img.alt || '';
+
+      // Always pause any playing video first
+      pauseLightboxVideo();
+
+      if (isVideo) {
+        var vid = item.querySelector('video');
+        if (lightboxImg) lightboxImg.style.display = 'none';
+        if (lightboxVid && vid) {
+          lightboxVid.src = vid.src;
+          lightboxVid.style.display = 'block';
+          lightboxVid.load();
+        }
+      } else {
+        var img = item.querySelector('img');
+        if (lightboxVid) lightboxVid.style.display = 'none';
+        if (lightboxImg && img) {
+          lightboxImg.style.display = 'block';
+          lightboxImg.src = img.src;
+          lightboxImg.alt = img.alt || '';
+        }
       }
+
       if (captionEl) captionEl.textContent = caption ? caption.textContent : '';
     }
 
@@ -644,7 +669,6 @@
     // Click handlers
     items.forEach(function (item) {
       item.addEventListener('click', function () {
-        if (this.getAttribute('data-type') === 'video') return;
         visibleItems = getVisibleItems();
         var idx = visibleItems.indexOf(this);
         if (idx !== -1) openLightbox(idx);

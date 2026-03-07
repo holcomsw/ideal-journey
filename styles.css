@@ -1327,7 +1327,8 @@ h1, h2, h3 {
   height: 160px;
 }
 
-.masonry-item img {
+.masonry-item img,
+.masonry-item video {
   width: 100%;
   display: block;
 }
