@@ -945,12 +945,14 @@
   }
 
   // --- Music Player ---
-  // YouTube playlist embed for background music.
-  // Shows after login with a compact YouTube player widget.
+  // YouTube playlist for background music with a compact play/pause button.
+  // The video iframe is hidden; only audio is heard.
 
   var MUSIC_PREFS_KEY = 'erff_music_prefs';
   var YOUTUBE_PLAYLIST_ID = 'PLhPh73eLkqauWtzllAGmkRreWZSC-m9OM';
   var musicPlayerEl = null;
+  var ytPlayer = null;
+  var musicIsPlaying = false;
 
   function getMusicPrefs() {
     try { return JSON.parse(localStorage.getItem(MUSIC_PREFS_KEY)) || {}; }
@@ -961,73 +963,103 @@
     localStorage.setItem(MUSIC_PREFS_KEY, JSON.stringify(prefs));
   }
 
-  function buildMusicPlayerUI() {
-    // Don't show on admin page
-    if (window.location.pathname.indexOf('admin') !== -1) return null;
+  function updatePlayPauseIcon() {
+    var btn = document.getElementById('music-play-btn');
+    if (!btn) return;
+    if (musicIsPlaying) {
+      btn.innerHTML = '<svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" fill="currentColor"/><rect x="14" y="4" width="4" height="16" fill="currentColor"/></svg>';
+      btn.title = 'Pause';
+    } else {
+      btn.innerHTML = '<svg viewBox="0 0 24 24"><polygon points="6,4 20,12 6,20" fill="currentColor"/></svg>';
+      btn.title = 'Play';
+    }
+  }
 
-    var prefs = getMusicPrefs();
+  function togglePlayPause() {
+    if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
+    var state = ytPlayer.getPlayerState();
+    if (state === YT.PlayerState.PLAYING) {
+      ytPlayer.pauseVideo();
+      musicIsPlaying = false;
+    } else {
+      ytPlayer.playVideo();
+      musicIsPlaying = true;
+    }
+    updatePlayPauseIcon();
+    saveMusicPrefs({ playing: musicIsPlaying });
+  }
+
+  function buildMusicPlayerUI() {
+    if (window.location.pathname.indexOf('admin') !== -1) return null;
 
     var el = document.createElement('div');
     el.className = 'music-player';
     el.id = 'music-player';
 
-    // Build the YouTube embed iframe
-    var embedSrc = 'https://www.youtube.com/embed/videoseries?list=' + YOUTUBE_PLAYLIST_ID;
-
     el.innerHTML =
-      '<div class="music-player-header">' +
-        '<div class="music-player-info">' +
-          '<span class="music-player-label">Festival Soundtrack</span>' +
-          '<span class="music-player-status" id="music-status">YouTube</span>' +
-        '</div>' +
-        '<button class="music-player-btn" id="music-collapse-btn" title="Collapse">' +
-          '<svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>' +
-        '</button>' +
-      '</div>' +
-      '<div class="music-player-embed" id="music-embed-container">' +
-        '<iframe id="youtube-player" src="' + embedSrc + '" ' +
-          'width="100%" height="152" frameBorder="0" ' +
-          'allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" ' +
-          'loading="lazy" style="border-radius:8px;"></iframe>' +
+      '<button class="music-play-btn" id="music-play-btn" title="Play">' +
+        '<svg viewBox="0 0 24 24"><polygon points="6,4 20,12 6,20" fill="currentColor"/></svg>' +
+      '</button>' +
+      '<span class="music-player-label">Festival Soundtrack</span>' +
+      '<div class="music-player-iframe-wrap" aria-hidden="true">' +
+        '<div id="youtube-player"></div>' +
       '</div>';
 
     document.body.appendChild(el);
-
-    // Restore collapsed state
-    if (prefs.collapsed) {
-      el.classList.add('music-player--collapsed');
-    }
-
     return el;
   }
 
-  function initMusicPlayer() {
-    // Only run on public pages (not admin)
-    if (window.location.pathname.indexOf('admin') !== -1) return;
+  function onYouTubeIframeAPIReady() {
+    ytPlayer = new YT.Player('youtube-player', {
+      height: '1',
+      width: '1',
+      playerVars: {
+        listType: 'playlist',
+        list: YOUTUBE_PLAYLIST_ID,
+        autoplay: 0,
+        loop: 1,
+        controls: 0
+      },
+      events: {
+        onReady: function () {
+          // Restore previous playing state
+          var prefs = getMusicPrefs();
+          if (prefs.playing) {
+            ytPlayer.playVideo();
+            musicIsPlaying = true;
+            updatePlayPauseIcon();
+          }
+        },
+        onStateChange: function (e) {
+          musicIsPlaying = (e.data === YT.PlayerState.PLAYING);
+          updatePlayPauseIcon();
+        }
+      }
+    });
+  }
 
-    // Only show if user is authenticated
+  function initMusicPlayer() {
+    if (window.location.pathname.indexOf('admin') !== -1) return;
     if (sessionStorage.getItem(SESSION_KEY) !== 'true') return;
 
     musicPlayerEl = buildMusicPlayerUI();
     if (!musicPlayerEl) return;
 
-    // Show the player UI after a short delay
+    // Show the player after a short delay
     setTimeout(function () {
       musicPlayerEl.classList.add('music-player--visible');
     }, 800);
 
-    // Wire up collapse toggle
-    document.getElementById('music-collapse-btn').addEventListener('click', function () {
-      var prefs = getMusicPrefs();
-      musicPlayerEl.classList.toggle('music-player--collapsed');
-      prefs.collapsed = musicPlayerEl.classList.contains('music-player--collapsed');
-      saveMusicPrefs(prefs);
-    });
-  }
+    // Wire up play/pause button
+    document.getElementById('music-play-btn').addEventListener('click', togglePlayPause);
 
-  function updateStatus(text) {
-    var el = document.getElementById('music-status');
-    if (el) el.textContent = text;
+    // Load YouTube IFrame API
+    var tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+
+    // The API calls window.onYouTubeIframeAPIReady when ready
+    window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
   }
 
   // Initialize

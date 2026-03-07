@@ -2751,9 +2751,11 @@ h1, h2, h3 {
   z-index: 9000;
   background: var(--color-navy);
   border: 1px solid rgba(212, 175, 55, 0.3);
-  border-radius: 14px;
-  padding: 10px;
-  width: 320px;
+  border-radius: 40px;
+  padding: 8px 16px 8px 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.3);
   font-family: var(--font-body);
   transition: opacity 0.4s ease, transform 0.4s ease;
@@ -2768,17 +2770,6 @@ h1, h2, h3 {
   pointer-events: auto;
 }
 
-.music-player-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-
-.music-player--collapsed .music-player-header {
-  margin-bottom: 0;
-}
-
 .music-player-label {
   font-size: 0.65rem;
   text-transform: uppercase;
@@ -2788,83 +2779,46 @@ h1, h2, h3 {
   line-height: 1;
 }
 
-.music-player-status {
-  font-size: 0.7rem;
-  color: rgba(255,255,255,0.5);
-  white-space: nowrap;
-  max-width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1;
-}
-
-.music-player-info {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.music-player-embed {
-  overflow: hidden;
-  max-height: 160px;
-  transition: max-height 0.3s ease, opacity 0.3s ease;
-}
-
-.music-player--collapsed .music-player-embed {
-  max-height: 0;
-  opacity: 0;
-}
-
-.music-player-btn {
+.music-play-btn {
   background: none;
-  border: none;
+  border: 2px solid var(--color-gold);
   cursor: pointer;
-  color: var(--color-cream);
-  padding: 4px;
-  border-radius: 6px;
+  color: var(--color-gold);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s, color 0.2s, transform 0.3s;
-  width: 30px;
-  height: 30px;
+  transition: background 0.2s, color 0.2s;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
 }
 
-.music-player--collapsed .music-player-btn svg {
-  transform: rotate(180deg);
+.music-play-btn:hover {
+  background: var(--color-gold);
+  color: var(--color-navy);
 }
 
-.music-player-btn:hover {
-  background: rgba(255,255,255,0.1);
-  color: var(--color-gold);
-}
-
-.music-player-btn svg {
+.music-play-btn svg {
   width: 16px;
   height: 16px;
   fill: currentColor;
-  transition: transform 0.3s ease;
 }
 
-.music-player-prompt {
-  font-size: 0.7rem;
-  color: var(--color-gold);
-  cursor: pointer;
-  white-space: nowrap;
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-@keyframes pulse-glow {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
+/* Hide the YouTube iframe completely — audio only */
+.music-player-iframe-wrap {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
 }
 
 @media (max-width: 480px) {
   .music-player {
     bottom: 12px;
     right: 12px;
-    left: 12px;
-    width: auto;
-    border-radius: 12px;
+    border-radius: 40px;
   }
 }
