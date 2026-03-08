@@ -1062,19 +1062,23 @@
       playerVars: {
         listType: 'playlist',
         list: YOUTUBE_PLAYLIST_ID,
-        autoplay: 0,
+        autoplay: 1,
         loop: 1,
         controls: 0
       },
       events: {
         onReady: function () {
-          // Restore previous playing state
+          // Default to playing; respect explicit pause preference
           var prefs = getMusicPrefs();
-          if (prefs.playing) {
+          if (prefs.playing === false) {
+            ytPlayer.pauseVideo();
+            musicIsPlaying = false;
+          } else {
             ytPlayer.playVideo();
             musicIsPlaying = true;
-            updatePlayPauseIcon();
           }
+          updatePlayPauseIcon();
+          updateSongTitle();
         },
         onStateChange: function (e) {
           musicIsPlaying = (e.data === YT.PlayerState.PLAYING);
