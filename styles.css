@@ -2759,17 +2759,18 @@ h1, h2, h3 {
   z-index: 9000;
   background: var(--color-navy);
   border: 1px solid rgba(212, 175, 55, 0.3);
-  border-radius: 40px;
-  padding: 8px 16px 8px 8px;
+  border-radius: 16px;
+  padding: 10px 14px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.3);
   font-family: var(--font-body);
   transition: opacity 0.4s ease, transform 0.4s ease;
   opacity: 0;
   transform: translateY(20px);
   pointer-events: none;
+  max-width: 320px;
 }
 
 .music-player--visible {
@@ -2778,13 +2779,30 @@ h1, h2, h3 {
   pointer-events: auto;
 }
 
+.music-player-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
 .music-player-label {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--color-gold);
   white-space: nowrap;
   line-height: 1;
+}
+
+.music-song-title {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
 }
 
 .music-play-btn {
@@ -2797,8 +2815,8 @@ h1, h2, h3 {
   align-items: center;
   justify-content: center;
   transition: background 0.2s, color 0.2s;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   flex-shrink: 0;
 }
 
@@ -2808,8 +2826,32 @@ h1, h2, h3 {
 }
 
 .music-play-btn svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+.music-skip-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  padding: 0;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.music-skip-btn:hover {
+  opacity: 1;
+}
+
+.music-skip-btn svg {
   fill: currentColor;
 }
 
@@ -2827,6 +2869,6 @@ h1, h2, h3 {
   .music-player {
     bottom: 12px;
     right: 12px;
-    border-radius: 40px;
+    max-width: 280px;
   }
 }

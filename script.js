@@ -1005,6 +1005,13 @@
     }
   }
 
+  function updateSongTitle() {
+    var titleEl = document.getElementById('music-song-title');
+    if (!titleEl || !ytPlayer || typeof ytPlayer.getVideoData !== 'function') return;
+    var data = ytPlayer.getVideoData();
+    titleEl.textContent = data && data.title ? data.title : 'Festival Soundtrack';
+  }
+
   function togglePlayPause() {
     if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
     var state = ytPlayer.getPlayerState();
@@ -1027,10 +1034,19 @@
     el.id = 'music-player';
 
     el.innerHTML =
+      '<button class="music-skip-btn" id="music-prev-btn" title="Previous">' +
+        '<svg viewBox="0 0 24 24" width="14" height="14"><rect x="4" y="5" width="3" height="14" fill="currentColor"/><polygon points="20,5 9,12 20,19" fill="currentColor"/></svg>' +
+      '</button>' +
       '<button class="music-play-btn" id="music-play-btn" title="Play">' +
         '<svg viewBox="0 0 24 24"><polygon points="6,4 20,12 6,20" fill="currentColor"/></svg>' +
       '</button>' +
-      '<span class="music-player-label">Festival Soundtrack</span>' +
+      '<button class="music-skip-btn" id="music-next-btn" title="Next">' +
+        '<svg viewBox="0 0 24 24" width="14" height="14"><rect x="17" y="5" width="3" height="14" fill="currentColor"/><polygon points="4,5 15,12 4,19" fill="currentColor"/></svg>' +
+      '</button>' +
+      '<div class="music-player-info">' +
+        '<span class="music-player-label">Festival Soundtrack</span>' +
+        '<span class="music-song-title" id="music-song-title"></span>' +
+      '</div>' +
       '<div class="music-player-iframe-wrap" aria-hidden="true">' +
         '<div id="youtube-player"></div>' +
       '</div>';
@@ -1063,6 +1079,9 @@
         onStateChange: function (e) {
           musicIsPlaying = (e.data === YT.PlayerState.PLAYING);
           updatePlayPauseIcon();
+          if (e.data === YT.PlayerState.PLAYING || e.data === YT.PlayerState.PAUSED) {
+            updateSongTitle();
+          }
         }
       }
     });
@@ -1080,8 +1099,18 @@
       musicPlayerEl.classList.add('music-player--visible');
     }, 800);
 
-    // Wire up play/pause button
+    // Wire up play/pause and skip buttons
     document.getElementById('music-play-btn').addEventListener('click', togglePlayPause);
+    document.getElementById('music-prev-btn').addEventListener('click', function () {
+      if (ytPlayer && typeof ytPlayer.previousVideo === 'function') {
+        ytPlayer.previousVideo();
+      }
+    });
+    document.getElementById('music-next-btn').addEventListener('click', function () {
+      if (ytPlayer && typeof ytPlayer.nextVideo === 'function') {
+        ytPlayer.nextVideo();
+      }
+    });
 
     // Load YouTube IFrame API
     var tag = document.createElement('script');
