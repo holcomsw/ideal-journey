@@ -3,6 +3,11 @@
 (function () {
   'use strict';
 
+  // --- Cleanup Tracking (for SPA navigation) ---
+  var activeIntervals = [];
+  var activeObservers = [];
+  var heroScrollHandler = null;
+
   // --- Password Gate ---
   var PASSCODE = 'filmfest2026';
   var SESSION_KEY = 'erff_authenticated';
@@ -72,6 +77,7 @@
       rootMargin: '0px 0px -40px 0px'
     });
 
+    activeObservers.push(observer);
     items.forEach(function (item) {
       observer.observe(item);
     });
@@ -98,8 +104,13 @@
     var hero = document.querySelector('.hero-content');
     if (!hero) return;
 
+    // Remove previous scroll handler if any
+    if (heroScrollHandler) {
+      window.removeEventListener('scroll', heroScrollHandler);
+    }
+
     var ticking = false;
-    window.addEventListener('scroll', function () {
+    heroScrollHandler = function () {
       if (!ticking) {
         requestAnimationFrame(function () {
           var scrolled = window.pageYOffset;
@@ -111,7 +122,8 @@
         });
         ticking = true;
       }
-    });
+    };
+    window.addEventListener('scroll', heroScrollHandler);
   }
 
   // Stagger timeline items for a cascading effect
@@ -149,7 +161,7 @@
     if (attrEl) attrEl.innerHTML = '&mdash; ' + QUOTES[index].attr;
 
     // Rotate every 8 seconds
-    setInterval(function () {
+    var quoteInterval = setInterval(function () {
       index = (index + 1) % QUOTES.length;
       quoteEl.style.opacity = '0';
       setTimeout(function () {
@@ -158,6 +170,7 @@
         quoteEl.style.opacity = '1';
       }, 500);
     }, 8000);
+    activeIntervals.push(quoteInterval);
   }
 
   // --- Supabase Client ---
@@ -315,7 +328,8 @@
     }
 
     update();
-    setInterval(update, 1000);
+    var countdownInterval = setInterval(update, 1000);
+    activeIntervals.push(countdownInterval);
   }
 
   function initVotingSystem() {
@@ -1092,6 +1106,7 @@
   }
 
   function initMusicPlayer() {
+    if (document.getElementById('music-player')) return; // Already initialized
     if (window.location.pathname.indexOf('admin') !== -1) return;
     if (sessionStorage.getItem(SESSION_KEY) !== 'true') return;
 
@@ -1125,6 +1140,132 @@
     window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
   }
 
+  // --- SPA Navigation ---
+  // Intercept internal links to swap page content without a full reload,
+  // keeping the music player alive across page transitions.
+
+  function cleanupPageFeatures() {
+    activeIntervals.forEach(function (id) { clearInterval(id); });
+    activeIntervals = [];
+    activeObservers.forEach(function (obs) { obs.disconnect(); });
+    activeObservers = [];
+    if (heroScrollHandler) {
+      window.removeEventListener('scroll', heroScrollHandler);
+      heroScrollHandler = null;
+    }
+  }
+
+  function reinitPageFeatures() {
+    cleanupPageFeatures();
+    staggerTimeline();
+    initScrollAnimations();
+    initSmoothScroll();
+    initHeroParallax();
+    initRotatingQuotes();
+    initVotingSystem();
+    initArchiveFilters();
+    initGallery();
+    initQuoteWall();
+    initTMDBPosters();
+    initVotePosters();
+  }
+
+  function updateActiveNavLink(href) {
+    document.querySelectorAll('.nav-link').forEach(function (link) {
+      var linkHref = link.getAttribute('href');
+      if (linkHref === href) {
+        link.classList.add('nav-link--active');
+      } else {
+        link.classList.remove('nav-link--active');
+      }
+    });
+  }
+
+  function loadSupabaseSDK(callback) {
+    if (window.supabase && window.supabase.createClient) {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      if (callback) callback();
+      return;
+    }
+    var script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    script.onload = function () {
+      if (window.supabase && window.supabase.createClient) {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      }
+      if (callback) callback();
+    };
+    document.head.appendChild(script);
+  }
+
+  function navigateToPage(href, isPopState) {
+    fetch(href)
+      .then(function (response) { return response.text(); })
+      .then(function (html) {
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(html, 'text/html');
+        var newContent = doc.getElementById('site-content');
+        if (!newContent) {
+          window.location.href = href;
+          return;
+        }
+
+        var current = document.getElementById('site-content');
+        current.innerHTML = newContent.innerHTML;
+        current.classList.remove('site-content--locked');
+
+        // Hide the login gate (user is already authenticated)
+        var gate = document.getElementById('login-gate');
+        if (gate) gate.style.display = 'none';
+
+        document.title = doc.title;
+        updateActiveNavLink(href);
+
+        if (!isPopState) {
+          history.pushState({ page: href }, '', href);
+        }
+
+        window.scrollTo(0, 0);
+
+        // Load Supabase if navigating to vote page
+        if (href.indexOf('vote') !== -1 && (!window.supabase || !supabase)) {
+          loadSupabaseSDK(function () {
+            reinitPageFeatures();
+          });
+        } else {
+          reinitPageFeatures();
+        }
+      })
+      .catch(function () {
+        window.location.href = href;
+      });
+  }
+
+  function initSPANavigation() {
+    if (sessionStorage.getItem(SESSION_KEY) !== 'true') return;
+
+    document.addEventListener('click', function (e) {
+      var link = e.target.closest('a[href]');
+      if (!link) return;
+
+      var href = link.getAttribute('href');
+      if (!href) return;
+      // Only intercept internal .html links
+      if (href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto:')) return;
+      if (href.indexOf('admin') !== -1) return;
+      if (!href.endsWith('.html')) return;
+
+      e.preventDefault();
+      navigateToPage(href);
+    });
+
+    window.addEventListener('popstate', function () {
+      var path = window.location.pathname;
+      var page = path.substring(path.lastIndexOf('/') + 1) || 'index.html';
+      navigateToPage(page, true);
+    });
+  }
+
   // Initialize
   document.addEventListener('DOMContentLoaded', function () {
     initLoginGate();
@@ -1142,5 +1283,8 @@
 
     // Start music player after a short delay to let the page settle
     setTimeout(initMusicPlayer, 800);
+
+    // Enable SPA navigation for persistent music playback
+    initSPANavigation();
   });
 })();
