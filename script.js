@@ -57,6 +57,7 @@
       // within the user's click gesture so autoplay is allowed by the browser
       initMusicPlayer();
       createYouTubePlayer();
+      setupAutoplayFallback();
       initSPANavigation();
     } else {
       gate.style.display = 'none';
