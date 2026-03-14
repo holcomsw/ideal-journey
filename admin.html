@@ -47,6 +47,7 @@
       <div class="container">
         <div class="admin-tabs">
           <button class="admin-tab admin-tab--active" data-tab="films">Films</button>
+          <button class="admin-tab" data-tab="voters">Voters</button>
           <button class="admin-tab" data-tab="voting">Voting</button>
           <button class="admin-tab" data-tab="gallery">Gallery</button>
           <button class="admin-tab" data-tab="quotes">Quotes</button>
@@ -123,6 +124,56 @@
           <div id="films-list" class="admin-list"></div>
         </div>
 
+        <!-- Voters Tab -->
+        <div class="admin-panel" id="panel-voters" hidden>
+          <div class="admin-panel-header">
+            <h2>Manage Voters</h2>
+            <button class="btn btn--submit" style="width:auto;" id="add-voter-btn">+ Add Voter</button>
+          </div>
+
+          <!-- Add Voter Form -->
+          <div id="voter-form-section" class="admin-form-section" hidden>
+            <h3 id="voter-form-title">Add New Voter</h3>
+            <form id="voter-form" class="admin-form">
+              <input type="hidden" id="voter-edit-id">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Username <span class="required">*</span></label>
+                  <input type="text" id="voter-username-input" class="form-input" placeholder="e.g. jsmith" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Display Name <span class="required">*</span></label>
+                  <input type="text" id="voter-display-name-input" class="form-input" placeholder="e.g. John Smith" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Password <span class="required">*</span></label>
+                  <input type="text" id="voter-password-input" class="form-input" placeholder="Enter password" required>
+                </div>
+              </div>
+              <div class="admin-form-actions">
+                <button type="submit" class="btn btn--submit" style="width:auto;">Save Voter</button>
+                <button type="button" class="btn btn--outline" id="cancel-voter-btn">Cancel</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Bulk Add -->
+          <div class="admin-card">
+            <h3>Bulk Add Voters</h3>
+            <p style="margin-bottom:var(--space-sm);color:var(--color-text-light);font-size:0.9rem;">One voter per line: <code>username, display name, password</code></p>
+            <textarea id="bulk-voters-input" class="form-textarea" rows="4" placeholder="jsmith, John Smith, pass123&#10;jdoe, Jane Doe, pass456"></textarea>
+            <button class="btn btn--submit" style="width:auto;margin-top:var(--space-sm);" id="bulk-add-voters-btn">Add All</button>
+          </div>
+
+          <!-- Voters List -->
+          <div class="admin-card">
+            <h3>Registered Voters (<span id="voter-count">0</span>)</h3>
+            <div id="voters-list" class="admin-list"></div>
+          </div>
+        </div>
+
         <!-- Voting Tab -->
         <div class="admin-panel" id="panel-voting" hidden>
           <div class="admin-panel-header">
@@ -141,6 +192,13 @@
                 <input type="checkbox" id="voting-open-toggle" class="toggle-input">
                 <span class="toggle-switch"></span>
                 <span class="toggle-text">Voting is Open</span>
+              </label>
+            </div>
+            <div class="admin-status-row" style="margin-top:var(--space-sm);">
+              <label class="toggle-label">
+                <input type="checkbox" id="test-mode-toggle" class="toggle-input">
+                <span class="toggle-switch"></span>
+                <span class="toggle-text">Test Mode (allows voting outside date window)</span>
               </label>
             </div>
             <div class="form-row" style="margin-top:var(--space-sm);">

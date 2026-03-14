@@ -54,7 +54,9 @@
   function initDashboard() {
     initTabs();
     initFilmsPanel();
+    initVotersPanel();
     initVotingPanel();
+    initTestMode();
     initGalleryPanel();
     initQuotesPanel();
     initContentPanel();
@@ -185,6 +187,225 @@
     saveFilms(films);
     renderFilmsList();
   };
+
+  // --- Password Hashing ---
+  function hashPassword(password) {
+    var encoder = new TextEncoder();
+    var data = encoder.encode(password);
+    return crypto.subtle.digest('SHA-256', data).then(function (buffer) {
+      var hashArray = Array.from(new Uint8Array(buffer));
+      return hashArray.map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+    });
+  }
+
+  // --- Voters Panel ---
+  function initVotersPanel() {
+    var addBtn = document.getElementById('add-voter-btn');
+    var cancelBtn = document.getElementById('cancel-voter-btn');
+    var formSection = document.getElementById('voter-form-section');
+    var form = document.getElementById('voter-form');
+    var bulkBtn = document.getElementById('bulk-add-voters-btn');
+
+    if (!addBtn) return;
+
+    addBtn.addEventListener('click', function () {
+      document.getElementById('voter-form-title').textContent = 'Add New Voter';
+      form.reset();
+      document.getElementById('voter-edit-id').value = '';
+      document.getElementById('voter-password-input').required = true;
+      formSection.hidden = false;
+    });
+
+    cancelBtn.addEventListener('click', function () {
+      formSection.hidden = true;
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var editId = document.getElementById('voter-edit-id').value;
+      var username = document.getElementById('voter-username-input').value.trim().toLowerCase();
+      var displayName = document.getElementById('voter-display-name-input').value.trim();
+      var password = document.getElementById('voter-password-input').value;
+
+      if (!sb) { alert('Database not available'); return; }
+
+      if (editId) {
+        // Editing existing voter
+        if (password) {
+          hashPassword(password).then(function (hash) {
+            sb.from('voters').update({ username: username, display_name: displayName, password_hash: hash })
+              .eq('id', editId).then(function (result) {
+                if (result.error) { alert('Error: ' + result.error.message); return; }
+                formSection.hidden = true;
+                renderVotersList();
+              });
+          });
+        } else {
+          sb.from('voters').update({ username: username, display_name: displayName })
+            .eq('id', editId).then(function (result) {
+              if (result.error) { alert('Error: ' + result.error.message); return; }
+              formSection.hidden = true;
+              renderVotersList();
+            });
+        }
+      } else {
+        // Adding new voter
+        if (!password) { alert('Password is required for new voters'); return; }
+        hashPassword(password).then(function (hash) {
+          sb.from('voters').insert({
+            username: username,
+            display_name: displayName,
+            password_hash: hash
+          }).then(function (result) {
+            if (result.error) { alert('Error: ' + result.error.message); return; }
+            formSection.hidden = true;
+            form.reset();
+            renderVotersList();
+          });
+        });
+      }
+    });
+
+    // Bulk add
+    if (bulkBtn) {
+      bulkBtn.addEventListener('click', function () {
+        var input = document.getElementById('bulk-voters-input').value.trim();
+        if (!input) return;
+        if (!sb) { alert('Database not available'); return; }
+
+        var lines = input.split('\n').filter(function (l) { return l.trim(); });
+        var voters = [];
+        for (var i = 0; i < lines.length; i++) {
+          var parts = lines[i].split(',').map(function (p) { return p.trim(); });
+          if (parts.length < 3) {
+            alert('Line ' + (i + 1) + ' is invalid. Expected: username, display name, password');
+            return;
+          }
+          voters.push({ username: parts[0].toLowerCase(), displayName: parts[1], password: parts[2] });
+        }
+
+        // Hash all passwords then insert
+        var hashPromises = voters.map(function (v) {
+          return hashPassword(v.password).then(function (hash) {
+            return { username: v.username, display_name: v.displayName, password_hash: hash };
+          });
+        });
+
+        Promise.all(hashPromises).then(function (rows) {
+          sb.from('voters').insert(rows).then(function (result) {
+            if (result.error) { alert('Error: ' + result.error.message); return; }
+            document.getElementById('bulk-voters-input').value = '';
+            alert(rows.length + ' voter(s) added!');
+            renderVotersList();
+          });
+        });
+      });
+    }
+
+    renderVotersList();
+  }
+
+  function renderVotersList() {
+    if (!sb) return;
+
+    sb.from('voters').select('*').order('created_at', { ascending: true }).then(function (result) {
+      if (result.error) { console.warn('Error fetching voters:', result.error.message); return; }
+      var voters = result.data || [];
+
+      document.getElementById('voter-count').textContent = voters.length;
+
+      var container = document.getElementById('voters-list');
+      if (!voters.length) {
+        container.innerHTML = '<p class="admin-empty">No voters registered yet.</p>';
+        return;
+      }
+
+      // Also fetch vote counts per voter
+      sb.from('votes').select('voter_id').then(function (vResult) {
+        var voteCounts = {};
+        (vResult.data || []).forEach(function (v) {
+          if (v.voter_id) {
+            voteCounts[v.voter_id] = (voteCounts[v.voter_id] || 0) + 1;
+          }
+        });
+
+        container.innerHTML = voters.map(function (v) {
+          var count = voteCounts[v.id] || 0;
+          return '<div class="admin-list-item">' +
+            '<div class="admin-list-item-info">' +
+              '<strong>' + escapeHtml(v.display_name) + '</strong>' +
+              ' <span style="color:var(--color-text-light);">(@' + escapeHtml(v.username) + ')</span>' +
+              (!v.is_active ? ' <span class="admin-badge">Inactive</span>' : '') +
+              '<br><small>' + count + '/5 votes cast</small>' +
+            '</div>' +
+            '<div class="admin-list-item-actions">' +
+              '<button class="admin-btn-sm" onclick="window.editVoter(\'' + v.id + '\')">Edit</button>' +
+              '<button class="admin-btn-sm" onclick="window.toggleVoterActive(\'' + v.id + '\', ' + v.is_active + ')">' +
+                (v.is_active ? 'Deactivate' : 'Activate') + '</button>' +
+              '<button class="admin-btn-sm admin-btn-sm--danger" onclick="window.deleteVoter(\'' + v.id + '\')">Delete</button>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      });
+    });
+  }
+
+  window.editVoter = function (id) {
+    if (!sb) return;
+    sb.from('voters').select('*').eq('id', id).single().then(function (result) {
+      if (result.error || !result.data) return;
+      var v = result.data;
+      document.getElementById('voter-form-title').textContent = 'Edit Voter';
+      document.getElementById('voter-edit-id').value = v.id;
+      document.getElementById('voter-username-input').value = v.username;
+      document.getElementById('voter-display-name-input').value = v.display_name;
+      document.getElementById('voter-password-input').value = '';
+      document.getElementById('voter-password-input').required = false;
+      document.getElementById('voter-password-input').placeholder = 'Leave blank to keep current';
+      document.getElementById('voter-form-section').hidden = false;
+    });
+  };
+
+  window.toggleVoterActive = function (id, currentlyActive) {
+    if (!sb) return;
+    sb.from('voters').update({ is_active: !currentlyActive }).eq('id', id).then(function (result) {
+      if (result.error) { alert('Error: ' + result.error.message); return; }
+      renderVotersList();
+    });
+  };
+
+  window.deleteVoter = function (id) {
+    if (!confirm('Delete this voter? Their votes will remain in the system.')) return;
+    if (!sb) return;
+    sb.from('voters').delete().eq('id', id).then(function (result) {
+      if (result.error) { alert('Error: ' + result.error.message); return; }
+      renderVotersList();
+    });
+  };
+
+  // --- Test Mode ---
+  function initTestMode() {
+    var toggle = document.getElementById('test-mode-toggle');
+    if (!toggle || !sb) return;
+
+    // Load current state
+    sb.from('settings').select('*').eq('key', 'test_mode').single().then(function (result) {
+      if (!result.error && result.data) {
+        toggle.checked = result.data.value === 'true';
+      }
+    });
+
+    toggle.addEventListener('change', function () {
+      var val = toggle.checked ? 'true' : 'false';
+      sb.from('settings').upsert({ key: 'test_mode', value: val, updated_at: new Date().toISOString() })
+        .then(function (result) {
+          if (result.error) {
+            alert('Error saving test mode: ' + result.error.message);
+            toggle.checked = !toggle.checked;
+          }
+        });
+    });
+  }
 
   // --- Voting (Supabase-powered) ---
 

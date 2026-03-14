@@ -186,6 +186,105 @@
     supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   }
 
+  // --- Voter Authentication ---
+  var VOTER_SESSION_KEY = 'erff_voter';
+  var MAX_VOTES = 5;
+
+  function hashPassword(password) {
+    var encoder = new TextEncoder();
+    var data = encoder.encode(password);
+    return crypto.subtle.digest('SHA-256', data).then(function (buffer) {
+      var hashArray = Array.from(new Uint8Array(buffer));
+      return hashArray.map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+    });
+  }
+
+  function getCurrentVoter() {
+    try { return JSON.parse(sessionStorage.getItem(VOTER_SESSION_KEY)); }
+    catch (e) { return null; }
+  }
+
+  function setCurrentVoter(voter) {
+    sessionStorage.setItem(VOTER_SESSION_KEY, JSON.stringify(voter));
+  }
+
+  function logoutVoter() {
+    sessionStorage.removeItem(VOTER_SESSION_KEY);
+  }
+
+  function loginVoter(username, password, callback) {
+    if (!supabase) { callback({ error: 'Database not available' }); return; }
+    hashPassword(password).then(function (hash) {
+      supabase.from('voters').select('*')
+        .eq('username', username.toLowerCase().trim())
+        .eq('password_hash', hash)
+        .eq('is_active', true)
+        .single()
+        .then(function (result) {
+          if (result.error || !result.data) {
+            callback({ error: 'Invalid username or password' });
+          } else {
+            var voter = {
+              id: result.data.id,
+              username: result.data.username,
+              displayName: result.data.display_name
+            };
+            setCurrentVoter(voter);
+            callback({ voter: voter });
+          }
+        });
+    });
+  }
+
+  function checkVotingOpen(callback) {
+    if (!supabase) {
+      callback(fallbackDateCheck(), false);
+      return;
+    }
+    supabase.from('settings').select('*').then(function (result) {
+      if (result.error) {
+        callback(fallbackDateCheck(), false);
+        return;
+      }
+      var settings = {};
+      (result.data || []).forEach(function (row) {
+        settings[row.key] = row.value;
+      });
+      var testMode = settings.test_mode === 'true';
+      if (testMode) {
+        callback(true, true);
+        return;
+      }
+      var now = new Date();
+      var openDate = new Date((settings.voting_open_date || '2026-06-01') + 'T00:00:00');
+      var closeDate = new Date((settings.voting_close_date || '2026-06-30') + 'T23:59:59');
+      callback(now >= openDate && now <= closeDate, false);
+    });
+  }
+
+  function fallbackDateCheck() {
+    var now = new Date();
+    return now >= new Date('2026-06-01T00:00:00') && now <= new Date('2026-06-30T23:59:59');
+  }
+
+  function getVoterVotes(voterId, callback) {
+    if (!supabase) { callback([]); return; }
+    supabase.from('votes').select('*').eq('voter_id', voterId)
+      .order('created_at', { ascending: true })
+      .then(function (result) {
+        if (result.error) { callback([]); return; }
+        var votes = (result.data || []).map(function (row) {
+          return {
+            id: row.id,
+            filmId: row.film_id,
+            filmName: row.film_name,
+            timestamp: row.created_at
+          };
+        });
+        callback(votes);
+      });
+  }
+
   // --- Voting System ---
   var VOTES_KEY = 'erff_votes';
   var SUGGESTIONS_KEY = 'erff_suggestions';
@@ -225,25 +324,35 @@
   }
 
   function saveVote(vote, callback) {
-    // Always save to localStorage as backup
-    var localVotes = getLocalVotes();
-    localVotes.push(vote);
-    localStorage.setItem(VOTES_KEY, JSON.stringify(localVotes));
+    var insertData = {
+      film_id: vote.filmId,
+      film_name: vote.filmName,
+      voter_name: vote.voterName,
+      comment: vote.comment || ''
+    };
+    if (vote.voterId) {
+      insertData.voter_id = vote.voterId;
+    }
 
     if (supabase) {
-      supabase.from('votes').insert({
-        film_id: vote.filmId,
-        film_name: vote.filmName,
-        voter_name: vote.voterName,
-        comment: vote.comment || ''
-      }).then(function (result) {
+      supabase.from('votes').insert(insertData).then(function (result) {
         if (result.error) {
           console.warn('Supabase insert error:', result.error.message);
+          // Pass error message back to caller for trigger violations
+          if (callback) callback(result.error.message);
+          return;
         }
-        if (callback) callback();
+        // Also save to localStorage as backup
+        var localVotes = getLocalVotes();
+        localVotes.push(vote);
+        localStorage.setItem(VOTES_KEY, JSON.stringify(localVotes));
+        if (callback) callback(null);
       });
     } else {
-      if (callback) callback();
+      var localVotes = getLocalVotes();
+      localVotes.push(vote);
+      localStorage.setItem(VOTES_KEY, JSON.stringify(localVotes));
+      if (callback) callback(null);
     }
   }
 
@@ -343,68 +452,106 @@
 
     initVotingCountdown();
 
-    if (!isVotingOpen()) {
-      voteOpen.hidden = true;
-      voteClosed.hidden = false;
-      renderResults();
-      return;
-    }
+    checkVotingOpen(function (isOpen, isTestMode) {
+      // Show test mode banner if active
+      var testBanner = document.getElementById('test-mode-banner');
+      if (testBanner) testBanner.hidden = !isTestMode;
 
-    // Vote buttons
-    document.querySelectorAll('.btn--vote').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var filmId = this.getAttribute('data-film-id');
-        var card = this.closest('.nominee-card');
-        var filmName = card.querySelector('.nominee-title').textContent;
-        openVoteModal(filmId, filmName);
-      });
-    });
+      if (!isOpen) {
+        voteOpen.hidden = true;
+        voteClosed.hidden = false;
+        renderResults();
+        return;
+      }
 
-    // Vote form submission
-    var voteForm = document.getElementById('vote-form');
-    if (voteForm) {
-      voteForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-        var filmId = document.getElementById('vote-film-id').value;
-        var name = document.getElementById('vote-name').value.trim();
-        var comment = document.getElementById('vote-comment').value.trim();
-        var card = document.querySelector('.nominee-card[data-film-id="' + filmId + '"]');
-        var filmName = card ? card.querySelector('.nominee-title').textContent : '';
+      voteOpen.hidden = false;
+      voteClosed.hidden = true;
 
-        saveVote({
-          filmId: filmId,
-          filmName: filmName,
-          voterName: name,
-          comment: comment,
-          timestamp: new Date().toISOString()
-        }, function () {
-          closeModal('vote-modal');
-          showConfirmation(name, filmName);
+      // Initialize voter login panel
+      initVoterLogin();
+
+      // Vote buttons
+      document.querySelectorAll('.btn--vote').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var voter = getCurrentVoter();
+          if (!voter) {
+            // Highlight the login panel
+            var loginPanel = document.getElementById('voter-login-panel');
+            if (loginPanel) {
+              loginPanel.classList.add('voter-login--highlight');
+              setTimeout(function () { loginPanel.classList.remove('voter-login--highlight'); }, 1500);
+              loginPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return;
+          }
+          var filmId = this.getAttribute('data-film-id');
+          var card = this.closest('.nominee-card');
+          var filmName = card.querySelector('.nominee-title').textContent;
+          openVoteModal(filmId, filmName);
         });
       });
-    }
 
-    // Modal close handlers
-    document.querySelectorAll('.modal-backdrop').forEach(function (backdrop) {
-      backdrop.addEventListener('click', function () {
-        var modal = this.closest('.modal');
-        if (modal) modal.hidden = true;
+      // Vote form submission
+      var voteForm = document.getElementById('vote-form');
+      if (voteForm) {
+        voteForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var voter = getCurrentVoter();
+          if (!voter) return;
+
+          var filmId = document.getElementById('vote-film-id').value;
+          var comment = document.getElementById('vote-comment').value.trim();
+          var card = document.querySelector('.nominee-card[data-film-id="' + filmId + '"]');
+          var filmName = card ? card.querySelector('.nominee-title').textContent : '';
+
+          var submitBtn = voteForm.querySelector('button[type="submit"]');
+          if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Submitting...'; }
+
+          saveVote({
+            filmId: filmId,
+            filmName: filmName,
+            voterName: voter.displayName,
+            voterId: voter.id,
+            comment: comment,
+            timestamp: new Date().toISOString()
+          }, function (err) {
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Submit Vote'; }
+            if (err) {
+              alert(err);
+              return;
+            }
+            closeModal('vote-modal');
+            showConfirmation(voter.displayName, filmName);
+            refreshVoteButtons();
+          });
+        });
+      }
+
+      // Modal close handlers
+      document.querySelectorAll('.modal-backdrop').forEach(function (backdrop) {
+        backdrop.addEventListener('click', function () {
+          var modal = this.closest('.modal');
+          if (modal) modal.hidden = true;
+        });
       });
+
+      document.querySelectorAll('.modal-close').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var modal = this.closest('.modal');
+          if (modal) modal.hidden = true;
+        });
+      });
+
+      var confirmClose = document.getElementById('confirmation-close');
+      if (confirmClose) {
+        confirmClose.addEventListener('click', function () {
+          closeModal('vote-confirmation');
+        });
+      }
+
+      // Update button states for logged-in voter
+      refreshVoteButtons();
     });
-
-    document.querySelectorAll('.modal-close').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var modal = this.closest('.modal');
-        if (modal) modal.hidden = true;
-      });
-    });
-
-    var confirmClose = document.getElementById('confirmation-close');
-    if (confirmClose) {
-      confirmClose.addEventListener('click', function () {
-        closeModal('vote-confirmation');
-      });
-    }
 
     // Write-in form
     var writeinForm = document.getElementById('writein-form');
@@ -454,10 +601,120 @@
     var modal = document.getElementById('vote-modal');
     document.getElementById('vote-film-id').value = filmId;
     document.getElementById('modal-film-name').textContent = filmName;
-    document.getElementById('vote-name').value = '';
     document.getElementById('vote-comment').value = '';
     modal.hidden = false;
-    document.getElementById('vote-name').focus();
+    document.getElementById('vote-comment').focus();
+  }
+
+  function initVoterLogin() {
+    var loginPanel = document.getElementById('voter-login-panel');
+    var loginForm = document.getElementById('voter-login-form');
+    var statusBar = document.getElementById('voter-status-bar');
+    var logoutBtn = document.getElementById('voter-logout-btn');
+    var loginError = document.getElementById('voter-login-error');
+    if (!loginPanel) return;
+
+    var voter = getCurrentVoter();
+    if (voter) {
+      showVoterStatus(voter);
+    }
+
+    if (loginForm) {
+      loginForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var username = document.getElementById('voter-username').value.trim();
+        var password = document.getElementById('voter-password').value;
+        if (loginError) loginError.hidden = true;
+
+        loginVoter(username, password, function (result) {
+          if (result.error) {
+            if (loginError) {
+              loginError.textContent = result.error;
+              loginError.hidden = false;
+            }
+            return;
+          }
+          showVoterStatus(result.voter);
+          refreshVoteButtons();
+        });
+      });
+    }
+
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', function () {
+        logoutVoter();
+        loginPanel.classList.remove('voter-login--authenticated');
+        if (statusBar) statusBar.hidden = true;
+        if (loginForm) {
+          loginForm.hidden = false;
+          loginForm.reset();
+        }
+        refreshVoteButtons();
+      });
+    }
+  }
+
+  function showVoterStatus(voter) {
+    var loginPanel = document.getElementById('voter-login-panel');
+    var loginForm = document.getElementById('voter-login-form');
+    var statusBar = document.getElementById('voter-status-bar');
+    var voterNameEl = document.getElementById('voter-display-name');
+
+    if (loginForm) loginForm.hidden = true;
+    if (loginPanel) loginPanel.classList.add('voter-login--authenticated');
+    if (voterNameEl) voterNameEl.textContent = voter.displayName;
+    if (statusBar) statusBar.hidden = false;
+
+    // Update remaining votes count
+    getVoterVotes(voter.id, function (votes) {
+      var remaining = MAX_VOTES - votes.length;
+      var countEl = document.getElementById('voter-votes-remaining');
+      if (countEl) countEl.textContent = remaining;
+    });
+  }
+
+  function refreshVoteButtons() {
+    var voter = getCurrentVoter();
+    var buttons = document.querySelectorAll('.btn--vote');
+
+    if (!voter) {
+      // Not logged in: show "Log in to vote" on all buttons
+      buttons.forEach(function (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Log in to vote';
+        btn.classList.remove('btn--vote--voted');
+      });
+      return;
+    }
+
+    getVoterVotes(voter.id, function (votes) {
+      var votedFilmIds = votes.map(function (v) { return v.filmId; });
+      var remaining = MAX_VOTES - votes.length;
+
+      // Update status bar count
+      var countEl = document.getElementById('voter-votes-remaining');
+      if (countEl) countEl.textContent = remaining;
+
+      buttons.forEach(function (btn) {
+        var filmId = btn.getAttribute('data-film-id');
+        if (votedFilmIds.indexOf(filmId) !== -1) {
+          // Already voted for this film
+          btn.disabled = true;
+          btn.textContent = 'Voted \u2713';
+          btn.classList.add('btn--vote--voted');
+        } else if (remaining <= 0) {
+          // All votes used
+          btn.disabled = true;
+          btn.textContent = 'All votes used';
+          btn.classList.remove('btn--vote--voted');
+        } else {
+          // Can still vote
+          btn.disabled = false;
+          btn.textContent = 'Vote for This Film';
+          btn.classList.remove('btn--vote--voted');
+        }
+      });
+    });
   }
 
   function closeModal(id) {

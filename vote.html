@@ -61,14 +61,50 @@
     </div>
   </header>
 
+  <!-- Test Mode Banner -->
+  <div id="test-mode-banner" class="test-mode-banner" hidden>
+    <div class="container">
+      <strong>TEST MODE</strong> &mdash; Voting is open for testing. This banner will not appear during the live voting period.
+    </div>
+  </div>
+
   <!-- Voting Open State -->
   <div id="vote-open">
+
+    <!-- Voter Login -->
+    <section class="section voter-login-section">
+      <div class="container">
+        <div id="voter-login-panel" class="voter-login-panel">
+          <form id="voter-login-form" class="voter-login-form">
+            <h3 class="voter-login-title">Sign In to Vote</h3>
+            <p class="voter-login-desc">Enter your credentials to cast your 5 votes.</p>
+            <div class="voter-login-fields">
+              <div class="form-group">
+                <input type="text" id="voter-username" class="form-input" placeholder="Username" autocomplete="username" required>
+              </div>
+              <div class="form-group">
+                <input type="password" id="voter-password" class="form-input" placeholder="Password" autocomplete="current-password" required>
+              </div>
+              <button type="submit" class="btn btn--submit voter-login-btn">Sign In</button>
+            </div>
+            <p id="voter-login-error" class="voter-login-error" hidden>Invalid username or password</p>
+          </form>
+          <div id="voter-status-bar" class="voter-status-bar" hidden>
+            <div class="voter-status-info">
+              <span class="voter-status-greeting">Welcome, <strong id="voter-display-name"></strong>!</span>
+              <span class="voter-status-count">You have <strong id="voter-votes-remaining">5</strong> votes remaining</span>
+            </div>
+            <button id="voter-logout-btn" class="btn btn--outline voter-logout-btn">Sign Out</button>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- Film Nominees -->
     <section class="section vote-nominees">
       <div class="container">
         <h2 class="section-title">The Nominees</h2>
-        <p class="section-intro">This year's selections. Study them carefully &mdash; you only get one vote.</p>
+        <p class="section-intro">This year's selections. Study them carefully &mdash; you get 5 votes.</p>
 
         <div class="nominees-grid" id="nominees-grid">
 
@@ -218,10 +254,6 @@
         <p class="modal-film-name" id="modal-film-name"></p>
         <form id="vote-form" class="vote-form">
           <input type="hidden" id="vote-film-id">
-          <div class="form-group">
-            <label for="vote-name" class="form-label">Your Name <span class="required">*</span></label>
-            <input type="text" id="vote-name" class="form-input" placeholder="Enter your name" required>
-          </div>
           <div class="form-group">
             <label for="vote-comment" class="form-label">Why this film? <span class="optional">(optional)</span></label>
             <textarea id="vote-comment" class="form-textarea" rows="3" placeholder="Tell us why you're voting for this one..."></textarea>
