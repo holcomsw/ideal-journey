@@ -249,6 +249,7 @@ h1, h2, h3 {
 /* --- Hero --- */
 .hero {
   position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -282,7 +283,7 @@ h1, h2, h3 {
   z-index: 2;
   padding: var(--space-md);
   padding-top: 100px;
-  padding-bottom: 160px;
+  padding-bottom: 100px;
   display: flex;
   flex-direction: column;
   align-items: center;
