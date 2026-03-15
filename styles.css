@@ -627,7 +627,7 @@ h1, h2, h3 {
 .gallery-preview-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-auto-rows: 160px;
+  grid-auto-rows: auto;
   gap: var(--space-sm);
   margin-bottom: var(--space-md);
 }
@@ -637,6 +637,7 @@ h1, h2, h3 {
   overflow: hidden;
   background: var(--color-cream-dark);
   transition: transform 0.3s ease;
+  aspect-ratio: 4/3;
 }
 
 .gallery-preview-item:hover {
@@ -653,6 +654,7 @@ h1, h2, h3 {
 
 .gallery-preview-item--tall {
   grid-row: span 2;
+  aspect-ratio: 3/4;
 }
 
 .gallery-placeholder {
@@ -2707,7 +2709,7 @@ h1, h2, h3 {
 
   .gallery-preview-grid {
     grid-template-columns: repeat(2, 1fr);
-    grid-auto-rows: 140px;
+    grid-auto-rows: auto;
   }
 
   .process-grid {
