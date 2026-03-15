@@ -121,8 +121,8 @@
         requestAnimationFrame(function () {
           var scrolled = window.pageYOffset;
           if (scrolled < window.innerHeight) {
-            hero.style.transform = 'translateY(' + (scrolled * 0.3) + 'px)';
-            hero.style.opacity = 1 - (scrolled / window.innerHeight) * 0.6;
+            hero.style.transform = 'translateY(' + (scrolled * -0.15) + 'px)';
+            hero.style.opacity = 1 - (scrolled / window.innerHeight) * 0.4;
           }
           ticking = false;
         });
