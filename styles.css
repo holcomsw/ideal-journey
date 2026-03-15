@@ -267,7 +267,7 @@ h1, h2, h3 {
       var(--color-gold-light) 100%
     );
   color: var(--color-white);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .hero-overlay {

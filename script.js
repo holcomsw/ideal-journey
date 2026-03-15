@@ -53,6 +53,8 @@
     content.classList.remove('site-content--locked');
     if (animate) {
       gate.classList.add('login-gate--hidden');
+      // Default music to playing on fresh login
+      saveMusicPrefs({ playing: true });
       // Build music player UI and create YouTube player synchronously
       // within the user's click gesture so autoplay is allowed by the browser
       initMusicPlayer();
