@@ -458,8 +458,31 @@
       if (testBanner) testBanner.hidden = !isTestMode;
 
       if (!isOpen) {
-        voteOpen.hidden = true;
+        // Show nominees but hide login, write-in, and modals
+        voteOpen.hidden = false;
         voteClosed.hidden = false;
+
+        // Hide voter login and write-in sections
+        var loginSection = document.querySelector('.voter-login-section');
+        var writeinSection = document.querySelector('.vote-writein');
+        var voteModal = document.getElementById('vote-modal');
+        var voteConfirmation = document.getElementById('vote-confirmation');
+        if (loginSection) loginSection.hidden = true;
+        if (writeinSection) writeinSection.hidden = true;
+        if (voteModal) voteModal.hidden = true;
+        if (voteConfirmation) voteConfirmation.hidden = true;
+
+        // Disable all vote buttons and update their text
+        document.querySelectorAll('.btn--vote').forEach(function (btn) {
+          btn.disabled = true;
+          btn.textContent = 'Voting Closed';
+          btn.classList.add('btn--disabled');
+        });
+
+        // Update intro text
+        var intro = document.querySelector('.vote-nominees .section-intro');
+        if (intro) intro.textContent = 'Voting has closed. Here are this year\'s nominees.';
+
         renderResults();
         return;
       }

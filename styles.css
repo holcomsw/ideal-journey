@@ -284,6 +284,7 @@ h1, h2, h3 {
   z-index: 2;
   padding: var(--space-md);
   padding-top: 100px;
+  padding-bottom: var(--space-xl);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2522,8 +2523,13 @@ h1, h2, h3 {
 
 /* Vote Button States */
 .btn--vote:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
+  background: var(--color-navy);
+}
+.btn--vote:disabled:hover {
+  transform: none;
+  background: var(--color-navy);
 }
 
 .btn--vote--voted {
