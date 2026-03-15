@@ -179,6 +179,103 @@
     activeIntervals.push(quoteInterval);
   }
 
+  // --- Rotating Gallery ---
+  var GALLERY_IMAGES = [
+    'images/2014/IMG_0975.jpeg',
+    'images/2016/P1030011.jpeg',
+    'images/2017/P1050802.jpeg',
+    'images/2018/IMG_2904.jpeg',
+    'images/2018/IMG_2905.jpeg',
+    'images/2019/IMG_0014.jpeg',
+    'images/2019/IMG_0016.png',
+    'images/2019/IMG_1120.jpeg',
+    'images/2020/IMG_0406.jpeg',
+    'images/2020/IMG_2654.jpeg',
+    'images/2020/IMG_2680.jpeg',
+    'images/2020/IMG_2711.jpeg',
+    'images/2020/IMG_2755.jpeg',
+    'images/2020/IMG_2771.jpeg',
+    'images/2020/IMG_2773.jpeg',
+    'images/2020/IMG_2926.jpeg',
+    'images/2021/DJI_0302.jpeg',
+    'images/2021/IMG_1144.jpeg',
+    'images/2021/IMG_1147.jpeg',
+    'images/2021/IMG_1151.jpeg',
+    'images/2021/IMG_1163.jpeg',
+    'images/2022/IMG_2433.jpeg',
+    'images/2022/IMG_2910.jpeg',
+    'images/2022/IMG_2915.jpeg',
+    'images/2022/IMG_2940.jpeg',
+    'images/2022/IMG_2950.jpeg',
+    'images/2022/IMG_3016.jpeg',
+    'images/2022/IMG_3058.jpeg',
+    'images/2022/IMG_3107.jpeg',
+    'images/2022/IMG_3184.jpeg',
+    'images/2023/DJI_0496.jpeg',
+    'images/2023/IMG_1554.jpeg',
+    'images/2023/IMG_3655.jpeg',
+    'images/2023/IMG_3685.jpeg',
+    'images/2023/IMG_4934.jpeg',
+    'images/2023/IMG_4943.jpeg',
+    'images/2023/IMG_4972.jpeg',
+    'images/2023/IMG_5807.jpeg',
+    'images/2023/IMG_5817.jpeg',
+    'images/2023/IMG_5848.jpeg',
+    'images/2023/IMG_5858.jpeg',
+    'images/2023/IMG_5902.jpeg',
+    'images/2024/IMG_1551.jpeg',
+    'images/2024/IMG_1597.jpeg',
+    'images/2024/IMG_1602.jpeg',
+    'images/2024/IMG_1612.jpeg',
+    'images/2024/IMG_1625.jpeg',
+    'images/2024/IMG_6862.jpeg',
+    'images/2024/IMG_7941.jpeg',
+    'images/2025/IMG_2069.jpeg',
+    'images/2025/IMG_2075.jpeg',
+    'images/2025/IMG_3684.jpeg',
+    'images/2025/IMG_3793.jpeg',
+    'images/2025/IMG_9153.jpeg'
+  ];
+
+  function initRotatingGallery() {
+    var grid = document.querySelector('.gallery-preview-grid');
+    if (!grid) return;
+
+    var items = grid.querySelectorAll('.gallery-preview-item img');
+    if (items.length === 0) return;
+
+    // Track currently displayed srcs
+    var currentSrcs = [];
+    for (var i = 0; i < items.length; i++) {
+      currentSrcs.push(items[i].getAttribute('src'));
+    }
+
+    var galleryInterval = setInterval(function () {
+      // Pick a random slot
+      var slotIndex = Math.floor(Math.random() * items.length);
+      var img = items[slotIndex];
+
+      // Pick a random image not currently displayed
+      var available = GALLERY_IMAGES.filter(function (src) {
+        return currentSrcs.indexOf(src) === -1;
+      });
+      if (available.length === 0) return;
+
+      var newSrc = available[Math.floor(Math.random() * available.length)];
+
+      // Fade out, swap, fade in
+      img.style.opacity = '0';
+      setTimeout(function () {
+        img.src = newSrc;
+        img.alt = 'Festival memory';
+        currentSrcs[slotIndex] = newSrc;
+        img.style.opacity = '1';
+      }, 400);
+    }, 5000);
+
+    activeIntervals.push(galleryInterval);
+  }
+
   // --- Supabase Client ---
   var SUPABASE_URL = 'https://mafzshadraujlyndvfwv.supabase.co';
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hZnpzaGFkcmF1amx5bmR2Znd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNjk2OTksImV4cCI6MjA4NzY0NTY5OX0.S0YIkmbnGxyAxG46ZO250jFsMph8rElB4mkfhF-uyYA';
@@ -1500,6 +1597,7 @@
     initQuoteWall();
     initTMDBPosters();
     initVotePosters();
+    initRotatingGallery();
   }
 
   function updateActiveNavLink(href) {
@@ -1615,6 +1713,7 @@
     initQuoteWall();
     initTMDBPosters();
     initVotePosters();
+    initRotatingGallery();
 
     // Pre-load YouTube API so it's ready when user logs in
     preloadYouTubeAPI();
