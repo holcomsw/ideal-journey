@@ -387,7 +387,9 @@
   // --- Voting System ---
   var VOTES_KEY = 'erff_votes';
   var SUGGESTIONS_KEY = 'erff_suggestions';
+  var VOTING_OPEN = new Date('2026-06-01T00:00:00');
   var VOTING_DEADLINE = new Date('2026-06-30T23:59:59');
+  var FESTIVAL_START = new Date('2026-07-04T00:00:00');
 
   // Fetch votes from Supabase, fall back to localStorage
   function getVotes(callback) {
@@ -518,25 +520,36 @@
     var el = document.getElementById('vote-countdown');
     if (!el) return;
 
-    function update() {
-      var now = new Date();
-      var diff = VOTING_DEADLINE - now;
-
-      if (diff <= 0) {
-        el.innerHTML = '<p style="color: var(--color-gold-light); font-weight: 600;">Voting has closed!</p>';
-        return;
-      }
-
+    function formatCountdown(diff) {
       var days = Math.floor(diff / (1000 * 60 * 60 * 24));
       var hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       var seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-      el.innerHTML =
-        '<div class="countdown-unit"><span class="countdown-number">' + days + '</span><span class="countdown-label">Days</span></div>' +
+      return '<div class="countdown-unit"><span class="countdown-number">' + days + '</span><span class="countdown-label">Days</span></div>' +
         '<div class="countdown-unit"><span class="countdown-number">' + hours + '</span><span class="countdown-label">Hours</span></div>' +
         '<div class="countdown-unit"><span class="countdown-number">' + minutes + '</span><span class="countdown-label">Min</span></div>' +
         '<div class="countdown-unit"><span class="countdown-number">' + seconds + '</span><span class="countdown-label">Sec</span></div>';
+    }
+
+    function update() {
+      var now = new Date();
+
+      if (now < VOTING_OPEN) {
+        // Before voting opens: count down to opening
+        var diff = VOTING_OPEN - now;
+        el.innerHTML = '<p class="countdown-phase-label">Voting opens in</p>' + formatCountdown(diff);
+      } else if (now <= VOTING_DEADLINE) {
+        // During voting: count down to close
+        var diff = VOTING_DEADLINE - now;
+        el.innerHTML = '<p class="countdown-phase-label">Voting closes in</p>' + formatCountdown(diff);
+      } else if (now < FESTIVAL_START) {
+        // After voting, before festival
+        var diff = FESTIVAL_START - now;
+        el.innerHTML = '<p class="countdown-phase-label">Festival begins in</p>' + formatCountdown(diff);
+      } else {
+        el.innerHTML = '<p style="color: var(--color-gold-light); font-weight: 600;">The festival is here!</p>';
+        return;
+      }
     }
 
     update();
