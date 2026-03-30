@@ -1503,14 +1503,18 @@ h1, h2, h3 {
   z-index: 10;
   background: var(--color-cream);
   padding: var(--space-sm) 0;
+  border-left: 3px solid transparent;
+  padding-left: var(--space-sm);
 }
 
 .quote-category-title {
-  font-family: var(--font-display);
-  font-size: clamp(1.3rem, 3vw, 1.7rem);
+  font-family: var(--font-body);
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
   color: var(--color-navy);
   white-space: nowrap;
-  letter-spacing: 0.01em;
 }
 
 .quote-category-line {
@@ -1519,179 +1523,69 @@ h1, h2, h3 {
   border-radius: 1px;
 }
 
-/* Category-specific accent lines */
-.quote-category--foundations .quote-category-line {
-  background: linear-gradient(to right, var(--color-navy), transparent);
-}
-.quote-category--wisdom .quote-category-line {
-  background: linear-gradient(to right, var(--color-lake), transparent);
-}
-.quote-category--topgun .quote-category-line {
-  background: linear-gradient(to right, var(--color-gold), transparent);
-}
-.quote-category--ferrell .quote-category-line {
-  background: linear-gradient(to right, var(--color-sunset), transparent);
-}
-.quote-category--oldschool .quote-category-line {
-  background: linear-gradient(to right, var(--color-pine), transparent);
-}
-.quote-category--winter .quote-category-line {
-  background: linear-gradient(to right, var(--color-lake-light), transparent);
+/* Category-specific accent colors */
+.quote-category--foundations .quote-category-header { border-left-color: var(--color-navy); }
+.quote-category--foundations .quote-category-line { background: linear-gradient(to right, var(--color-navy), transparent); }
+
+.quote-category--wisdom .quote-category-header { border-left-color: var(--color-lake); }
+.quote-category--wisdom .quote-category-line { background: linear-gradient(to right, var(--color-lake), transparent); }
+
+.quote-category--topgun .quote-category-header { border-left-color: var(--color-gold); }
+.quote-category--topgun .quote-category-line { background: linear-gradient(to right, var(--color-gold), transparent); }
+
+.quote-category--ferrell .quote-category-header { border-left-color: var(--color-sunset); }
+.quote-category--ferrell .quote-category-line { background: linear-gradient(to right, var(--color-sunset), transparent); }
+
+.quote-category--oldschool .quote-category-header { border-left-color: var(--color-pine); }
+.quote-category--oldschool .quote-category-line { background: linear-gradient(to right, var(--color-pine), transparent); }
+
+.quote-category--winter .quote-category-header { border-left-color: var(--color-lake-light); }
+.quote-category--winter .quote-category-line { background: linear-gradient(to right, var(--color-lake-light), transparent); }
+
+/* --- Screenplay Page --- */
+.script-page {
+  max-width: 680px;
+  margin: 0 auto;
 }
 
-/* --- Masonry Quote Grid --- */
-.quotes-masonry {
-  columns: 3;
-  column-gap: var(--space-md);
+/* --- Script Entry (individual quote) --- */
+.script-entry {
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--color-cream-dark);
 }
 
-/* --- Quote Cards --- */
-.quote-card {
-  break-inside: avoid;
-  margin-bottom: var(--space-md);
-  border-radius: 16px;
-  padding: var(--space-md) var(--space-md) var(--space-sm);
-  position: relative;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+.script-entry:last-child {
+  border-bottom: none;
 }
 
-.quote-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(27, 58, 75, 0.15);
-}
-
-.quote-card:hover .quote-card-reel {
-  opacity: 1;
-}
-
-.quote-card.hidden {
-  display: none;
-}
-
-/* Film reel icon on hover */
-.quote-card-reel {
-  position: absolute;
-  top: 12px;
-  right: 14px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  font-size: 0.9rem;
-}
-
-/* Category color schemes */
-/* Foundations: Navy family */
-.quote-category--foundations .quote-card {
-  background: var(--color-navy);
-  color: var(--color-cream);
-}
-.quote-category--foundations .quote-card-chip {
-  background: rgba(245, 239, 227, 0.15);
-  color: var(--color-cream);
-}
-
-/* Wisdom: Lake family */
-.quote-category--wisdom .quote-card {
-  background: var(--color-lake);
-  color: var(--color-white);
-}
-.quote-category--wisdom .quote-card-chip {
-  background: rgba(255, 255, 255, 0.18);
-  color: var(--color-white);
-}
-
-/* Top Gun: Gold family */
-.quote-category--topgun .quote-card {
-  background: var(--color-gold);
-  color: var(--color-navy-deep);
-}
-.quote-category--topgun .quote-card-chip {
-  background: rgba(18, 42, 56, 0.12);
-  color: var(--color-navy-deep);
-}
-.quote-category--topgun .quote-card-mark {
-  opacity: 0.3;
-}
-
-/* Ferrell: Sunset family */
-.quote-category--ferrell .quote-card {
-  background: var(--color-sunset);
-  color: var(--color-white);
-}
-.quote-category--ferrell .quote-card-chip {
-  background: rgba(255, 255, 255, 0.2);
-  color: var(--color-white);
-}
-
-/* Old School: Pine family */
-.quote-category--oldschool .quote-card {
-  background: var(--color-pine);
-  color: var(--color-white);
-}
-.quote-category--oldschool .quote-card-chip {
-  background: rgba(255, 255, 255, 0.18);
-  color: var(--color-white);
-}
-
-/* Winter: Frost/light theme */
-.quote-category--winter .quote-card {
-  background: var(--color-white);
-  color: var(--color-navy);
-  border: 1px solid var(--color-cream-dark);
-}
-.quote-category--winter .quote-card-chip {
-  background: var(--color-lake-light);
-  color: var(--color-white);
-}
-.quote-category--winter .quote-card-mark {
-  color: var(--color-lake-light);
-}
-
-/* --- Quote Card Inner Elements --- */
-.quote-card-mark {
-  font-family: var(--font-display);
-  font-size: 3.5rem;
-  opacity: 0.2;
-  line-height: 0.4;
+/* --- Character Name (film title) --- */
+.script-character {
+  font-family: var(--font-body);
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-align: center;
+  color: var(--color-text-light);
   margin-bottom: var(--space-xs);
-  user-select: none;
 }
 
-.quote-card-text {
+/* --- Dialogue (quote text) --- */
+.script-dialogue {
   font-family: var(--font-display);
-  font-size: 1.15rem;
   font-style: italic;
+  font-size: 1.15rem;
   line-height: 1.7;
-  margin-bottom: var(--space-sm);
+  text-align: center;
+  color: var(--color-text);
+  max-width: 520px;
+  margin: 0 auto;
 }
 
 /* Short quotes get bigger text */
-.quote-card--short .quote-card-text {
+.script-entry--short .script-dialogue {
   font-size: 1.4rem;
   line-height: 1.5;
-}
-
-/* Film attribution chip */
-.quote-card-chip {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  line-height: 1.4;
-}
-
-.quote-card-meta {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  flex-wrap: wrap;
-}
-
-.quote-card-person {
-  font-weight: 600;
-  font-size: 0.8rem;
-  opacity: 0.7;
 }
 
 /* ============================================
@@ -2725,8 +2619,12 @@ h1, h2, h3 {
     columns: 2;
   }
 
-  .quotes-masonry {
-    columns: 2;
+  .script-page {
+    max-width: 100%;
+  }
+
+  .script-dialogue {
+    max-width: 100%;
   }
 
   .founders-grid {
@@ -2825,8 +2723,17 @@ h1, h2, h3 {
     columns: 1;
   }
 
-  .quotes-masonry {
-    columns: 1;
+  .script-character {
+    letter-spacing: 0.08em;
+    font-size: 0.8rem;
+  }
+
+  .script-dialogue {
+    font-size: 1rem;
+  }
+
+  .script-entry--short .script-dialogue {
+    font-size: 1.2rem;
   }
 
   .moment-item {
