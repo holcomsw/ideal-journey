@@ -1582,6 +1582,24 @@ h1, h2, h3 {
   margin: 0 auto;
 }
 
+/* Stage direction — YouTube scene link */
+.script-direction {
+  display: block;
+  text-align: center;
+  margin-top: var(--space-xs);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--color-text-light);
+  text-decoration: none;
+  letter-spacing: 0.03em;
+  transition: color 0.2s ease;
+}
+
+.script-direction:hover {
+  color: var(--color-gold);
+}
+
 /* Short quotes get bigger text */
 .script-entry--short .script-dialogue {
   font-size: 1.4rem;
