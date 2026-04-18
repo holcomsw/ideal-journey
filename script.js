@@ -593,7 +593,7 @@
 
         // Update intro text
         var intro = document.querySelector('.vote-nominees .section-intro');
-        if (intro) intro.textContent = 'Voting has closed. Here are this year\'s nominees.';
+        if (intro) intro.textContent = 'Voting is closed. Here are this year\'s nominees.';
 
         renderResults();
         return;
