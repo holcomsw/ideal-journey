@@ -317,8 +317,8 @@ expectedNominees.forEach(function (id) {
 section('7. Password Gate');
 
 assert(
-  scriptJs.indexOf('filmfest2026') !== -1,
-  'Site passcode "filmfest2026" is in script'
+  scriptJs.indexOf('60PercentOrange') !== -1,
+  'Site passcode "60PercentOrange" is in script'
 );
 
 Object.keys(allPages).forEach(function (pageName) {

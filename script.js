@@ -9,7 +9,7 @@
   var heroScrollHandler = null;
 
   // --- Password Gate ---
-  var PASSCODE = 'filmfest2026';
+  var PASSCODE = '60PercentOrange';
   var SESSION_KEY = 'erff_authenticated';
 
   function initLoginGate() {
