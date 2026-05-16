@@ -88,10 +88,9 @@ VALUES
   NULL, '2024-10-15', '16:17.5', 977.5,   -- APPROX date; placement unknown
   NULL, NULL, '6th', 2024, 'image_extraction'),
 
--- ⚠️  LOW CONFIDENCE: time may be 14:01 not 11:01 — please verify before inserting
--- ('Brady Holcomb', 'cross_country', '2 Miles Boys Varsity (7th & 8th Grade)',
---   NULL, '2024-10-10', '14:01', 841.0,
---   120, NULL, '6th', 2024, 'image_extraction'),
+('Brady Holcomb', 'cross_country', '2 Miles Boys',
+  '2025 IESA Class 1A Sectional B', '2024-10-11', '14:11.3', 851.3,
+  74, NULL, '6th', 2024, 'image_extraction'),
 
 ('Brady Holcomb', 'cross_country', '1.5 Miles THFR Varsity Boys',
   NULL, '2024-09-20', '11:34.8', 694.8,   -- APPROX date

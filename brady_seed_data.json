@@ -248,18 +248,18 @@
     {
       "athlete_name": "Brady Holcomb",
       "sport": "cross_country",
-      "event": "2 Miles Boys Varsity (7th & 8th Grade)",
-      "meet_name": null,
-      "meet_date": "2024-10-10",
-      "result": "14:01",
-      "result_seconds": 841.0,
-      "placement": 120,
+      "event": "2 Miles Boys",
+      "meet_name": "2025 IESA Class 1A Sectional B",
+      "meet_date": "2024-10-11",
+      "result": "14:11.3",
+      "result_seconds": 851.3,
+      "placement": 74,
       "team": null,
       "grade": "6th",
       "season_year": 2024,
       "source": "image_extraction",
-      "_confidence": "low",
-      "_notes": "TIME IS UNCERTAIN — may be 14:01 or 11:01. Please verify. A time of 11:01 for 2 miles seems inconsistent with 120th place. Date APPROX."
+      "_confidence": "confirmed",
+      "_notes": "Confirmed by parent 2026-05-16"
     },
 
     {
