@@ -7,24 +7,39 @@ import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/hooks/useAuth'
 
 export default function LoginPage() {
+  const [mode, setMode] = useState<'signin' | 'signup'>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPw, setShowPw] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
-  const { signIn } = useAuth()
+  const { signIn, signUp } = useAuth()
   const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+    setSuccess('')
     setLoading(true)
-    const err = await signIn(email, password)
-    if (err) {
-      setError(err.message)
+
+    if (mode === 'signup') {
+      const err = await signUp(email, password)
+      if (err) {
+        setError(err.message)
+      } else {
+        setSuccess('Account created! Check your email for a confirmation link, then sign in.')
+        setMode('signin')
+      }
       setLoading(false)
     } else {
-      router.push('/dashboard')
+      const err = await signIn(email, password)
+      if (err) {
+        setError(err.message)
+        setLoading(false)
+      } else {
+        router.push('/dashboard')
+      }
     }
   }
 
@@ -32,7 +47,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-bg-base bg-carbon flex items-center justify-center p-4">
-      {/* Background glows */}
       <div className="fixed top-0 right-0 w-96 h-96 bg-brand-blue/5 rounded-full blur-3xl pointer-events-none" />
       <div className="fixed bottom-0 left-0 w-80 h-80 bg-brand-green/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -42,7 +56,6 @@ export default function LoginPage() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-sm"
       >
-        {/* Logo / brand */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-blue to-brand-green mx-auto mb-4 flex items-center justify-center shadow-glow-blue">
             <Zap size={28} className="text-white" />
@@ -51,11 +64,26 @@ export default function LoginPage() {
           <p className="text-text-muted text-sm mt-1">Elite Performance Tracker</p>
         </div>
 
-        {/* Card */}
         <div className="bg-bg-card border border-border rounded-2xl p-6 shadow-card bg-carbon">
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-blue/40 to-transparent rounded-t-2xl" />
 
-          <h2 className="text-lg font-bold text-text-primary mb-6">Sign In</h2>
+          {/* Mode tabs */}
+          <div className="flex bg-bg-elevated rounded-xl p-1 mb-6">
+            {(['signin', 'signup'] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => { setMode(m); setError(''); setSuccess('') }}
+                className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
+                  mode === m
+                    ? 'bg-brand-blue text-white shadow-glow-blue'
+                    : 'text-text-muted hover:text-text-primary'
+                }`}
+              >
+                {m === 'signin' ? 'Sign In' : 'Create Account'}
+              </button>
+            ))}
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -75,7 +103,8 @@ export default function LoginPage() {
               </label>
               <div className="relative">
                 <input
-                  type={showPw ? 'text' : 'password'} required autoComplete="current-password"
+                  type={showPw ? 'text' : 'password'} required
+                  autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                   className={inputCls + ' pr-10'} placeholder="••••••••"
                   value={password} onChange={e => setPassword(e.target.value)}
                 />
@@ -94,13 +123,20 @@ export default function LoginPage() {
               </motion.p>
             )}
 
+            {success && (
+              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                className="text-brand-green text-sm bg-brand-green/10 border border-brand-green/30 rounded-lg px-3 py-2">
+                {success}
+              </motion.p>
+            )}
+
             <Button type="submit" size="lg" className="w-full mt-2" disabled={loading}>
               {loading ? (
                 <span className="flex items-center gap-2">
                   <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Signing in…
+                  {mode === 'signup' ? 'Creating account…' : 'Signing in…'}
                 </span>
-              ) : 'Sign In'}
+              ) : mode === 'signup' ? 'Create Account' : 'Sign In'}
             </Button>
           </form>
         </div>
