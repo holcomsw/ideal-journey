@@ -417,8 +417,8 @@ assert(
 // Check that nominees on vote page have TMDB data attributes
 var tmdbDataCount = (voteHtml.match(/data-tmdb-title/g) || []).length;
 assert(
-  tmdbDataCount === 7,
-  'All 7 nominees have data-tmdb-title attribute (found ' + tmdbDataCount + ')'
+  tmdbDataCount === 8,
+  'All 8 nominees have data-tmdb-title attribute (found ' + tmdbDataCount + ')'
 );
 
 // ═════════════════════════════════════════════════════════════
